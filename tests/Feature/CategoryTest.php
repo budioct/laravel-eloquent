@@ -10,6 +10,13 @@ use Tests\TestCase;
 class CategoryTest extends TestCase
 {
 
+    /**
+     * Insert
+     * ● Untuk melakukan insert data, kita bisa menggunakan method save() setelah membuat object dari
+     *   class Model yang kita buat dari model
+     * ● Method save() akan mengembalikan status bool, jika sukses atau gagal
+     */
+
     public function testInsertEloquent(){
 
         $category = new Category(); // instance model yang sudah binding database.table
