@@ -34,4 +34,34 @@ class CategoryTest extends TestCase
 
     }
 
+    /**
+     * Query Builder
+     * ● Setelah membuat Model, untuk melakukan operasi CRUD terhadap Model yang sudah kita buat,
+     *   kita bisa menggunakan Query Builder
+     * ● Caranya kita tidak perlu menggunakan Facade DB, kita cukup gunakan static method query() di
+     *   Model yang sudah kita buat
+     *
+     * Magic Method
+     * ● Beberapa tutorial ada yang tidak menggunakan method query() ketika melakukan operasi ke
+     *   Model, kenapa?
+     * ● Hal ini karena terdapat fitur Metaprogramming di Model, yang sebenarnya meneruskan method
+     *   yang dipanggil ke Query Builder
+     * ● Kita bisa lihat di source code Model, terdapat method __call() (yang di pangil dari object nya) dan __callStatic() (langsung dari class nya)
+     * ● Magic Method ini sudah pernah kita bahas di kelas PHP OOP
+     * ● https://www.php.net/manual/en/language.oop5.magic.php
+     *
+     * note: magic method
+     *  __call() (yang di pangil dari object nya) --> panggil dari object model yang instance new Object()
+     *  __callStatic() (langsung dari class nya) --> panggil dari object model static method
+     *
+     */
+
+    public function testMethodMagic(){
+
+        // __callStatic()
+        Category::query()->where();
+        Category::where();
+
+    }
+
 }
