@@ -201,4 +201,114 @@ class CategoryTest extends TestCase
 
     }
 
+    /**
+     * Select
+     * ● Untuk melakukan select data yang datanya bisa lebih dari satu, maka kita bisa menggunakan Query
+     *   Builder seperti biasanya, yang sudah kita bahas di materi Laravel Database
+     *
+     * Perhatikan
+     * ● Saat kita melakukan select lebih dari satu data, hasil dari Query Builder adalah Collection dari
+     *   Model nya
+     * ● Jadi bukan hanya Collection Array
+     * ● Artinya kita bisa melakukan operasi lainnya pada hasil select Model tersebut, misal melakukan
+     *   update
+     *
+     * note: select()->get() akan return list object
+     */
+
+    public function testSelectCategory(){
+
+        for ($i = 0; $i < 5; $i++) {
+        // sql: insert into `categories` (`id`, `name`) values (?, ?) // insert data 5x
+            $category = new Category();
+            $category->id = "FOOD $i";
+            $category->name = "Food $i";
+            $category->save(); // save() // eksekusi simpan
+        }
+
+        // sql: select * from `categories` where `description` is null
+        // $category = Category::query()
+        //    ->whereNull("description")
+        //    ->get(); // akan dapat semua data dalam bentuk list array object [{},{}]
+
+        // sql: select `id`, `name` from `categories` where `description` is null
+        $category = Category::query()
+            ->select('id', 'name')
+            ->whereNull('description')
+            ->get(); // akan dapat semua data dalam bentuk list array object [{},{}]
+
+        self::assertEquals(5, $category->count());
+
+        $category->each(function ($item){
+            self::assertNull($item->description);
+            Log::info($item);
+        });
+
+        /**
+         * result:
+         * [2024-06-21 10:09:54] testing.INFO: select * from `categories` where `description` is null
+         * [2024-06-21 10:09:54] testing.INFO: {"id":"FOOD 0","name":"Food 0","description":null,"created_at":"2024-06-21 17:09:54"}
+         * [2024-06-21 10:09:54] testing.INFO: {"id":"FOOD 1","name":"Food 1","description":null,"created_at":"2024-06-21 17:09:54"}
+         * [2024-06-21 10:09:54] testing.INFO: {"id":"FOOD 2","name":"Food 2","description":null,"created_at":"2024-06-21 17:09:54"}
+         * [2024-06-21 10:09:54] testing.INFO: {"id":"FOOD 3","name":"Food 3","description":null,"created_at":"2024-06-21 17:09:54"}
+         * [2024-06-21 10:09:54] testing.INFO: {"id":"FOOD 4","name":"Food 4","description":null,"created_at":"2024-06-21 17:09:54"}
+         */
+
+    }
+
+    public function testSelectCategoryLaluDiUpdateLagi(){
+
+        for ($i = 0; $i < 5; $i++) {
+            // sql: insert into `categories` (`id`, `name`) values (?, ?) // insert data 5x
+            $category = new Category();
+            $category->id = "FOOD $i";
+            $category->name = "Food $i";
+            $category->save(); // save() // eksekusi simpan
+        }
+
+        // sql: select * from `categories` where `description` is null
+        // $category = Category::query()
+        //    ->whereNull("description")
+        //    ->get(); // akan dapat semua data dalam bentuk list array object [{},{}]
+
+        // sql: select `id`, `name` from `categories` where `description` is null
+        $category = Category::query()
+            ->select('id', 'name')
+            ->whereNull('description')
+            ->get(); // akan dapat semua data dalam bentuk list array object [{},{}]
+
+        self::assertEquals(5, $category->count());
+
+        $category->each(function ($item){
+            self::assertNull($item->description);
+
+            // karna yang kita dapat adalah list object bukan list collection.. kita masih bisa update datanya
+            // seperti ini
+            $item->description = "Updated Broo";
+
+            // sql: update `categories` set `description` = ? where `id` = ?
+            $item->update();
+
+            Log::info($item);
+        });
+
+        /**
+         * result:
+         * [2024-06-21 10:20:34] testing.INFO: select `id`, `name` from `categories` where `description` is null
+         * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
+         * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 0","name":"Food 0","description":"Updated Broo"}
+         * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
+         * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 1","name":"Food 1","description":"Updated Broo"}
+         * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
+         * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 2","name":"Food 2","description":"Updated Broo"}
+         * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
+         * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 3","name":"Food 3","description":"Updated Broo"}
+         * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
+         * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 4","name":"Food 4","description":"Updated Broo"}
+         */
+
+    }
+
+
+
 }
