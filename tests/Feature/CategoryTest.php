@@ -80,6 +80,8 @@ class CategoryTest extends TestCase
 
     public function testInsertManyCategory(){
 
+        // insert multiple (lebih dari 1 data)
+
         $categories = [];
         for ($i = 0; $i < 10; $i++) {
             $categories[] = [
@@ -305,6 +307,66 @@ class CategoryTest extends TestCase
          * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 3","name":"Food 3","description":"Updated Broo"}
          * [2024-06-21 10:20:34] testing.INFO: update `categories` set `description` = ? where `id` = ?
          * [2024-06-21 10:20:34] testing.INFO: {"id":"FOOD 4","name":"Food 4","description":"Updated Broo"}
+         */
+
+    }
+
+    /**
+     * Update Many
+     * ● Pada kasus misal kita mau melakukan update yang bisa berdampak ke lebih dari satu data, kita
+     *   tidak perlu melakukan update satu per satu ke object model nya
+     * ● Kita bisa menggunakan Query Builder
+     */
+
+    public function testUpdateManyCategory(){
+
+        // update multiple (lebih dari 1 data)
+
+        $categories = [];
+        for ($i = 0; $i < 5; $i++) {
+            $categories[] = [
+                "id" => "ID $i",
+                "name" => "Name $i",
+            ]; // data di sisipkan ke array $categories[]
+        }
+
+        // sql: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+        $result = Category::query()->insert($categories);
+        //$result = Category::insert($categories);
+
+        self::assertTrue($result);
+        foreach ($categories as $category) {
+            Log::info(json_encode($category));
+        }
+
+        // sql: update `categories` set `description` = ? where `description` is null
+        Category::query()->whereNull("description")->update([
+            "description" => "Updated"
+        ]); // update(array $values): int // update lebih dari satu data
+
+        // sql: select * from `categories` where `description` = ?
+        $list = Category::query()->where("description", "=", "Updated")->get();
+
+        self::assertEquals(5, $list->count());
+        $list->each(function ($item){
+            Log::info(json_encode($item));
+        });
+
+        /**
+         * result:
+         * [2024-06-21 15:35:58] testing.INFO: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 0","name":"Name 0"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 1","name":"Name 1"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 2","name":"Name 2"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 3","name":"Name 3"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 4","name":"Name 4"}
+         * [2024-06-21 15:35:58] testing.INFO: update `categories` set `description` = ? where `description` is null
+         * [2024-06-21 15:35:58] testing.INFO: select * from `categories` where `description` = ?
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 0","name":"Name 0","description":"Updated","created_at":"2024-06-21 22:35:58"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 1","name":"Name 1","description":"Updated","created_at":"2024-06-21 22:35:58"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 2","name":"Name 2","description":"Updated","created_at":"2024-06-21 22:35:58"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 3","name":"Name 3","description":"Updated","created_at":"2024-06-21 22:35:58"}
+         * [2024-06-21 15:35:58] testing.INFO: {"id":"ID 4","name":"Name 4","description":"Updated","created_at":"2024-06-21 22:35:58"}
          */
 
     }
