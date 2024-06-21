@@ -161,4 +161,44 @@ class CategoryTest extends TestCase
 
     }
 
+    /**
+     * Update
+     * ● Untuk melakukan update terhadap Model, kita bisa menggunakan method update() atau save()
+     * ● Saat melakukan update, kita harus melakukan find() data terlebih dahulu, jadi bukan dengan
+     *   membuat object Model baru dengan menggunakan kata kunci new
+     * ● Jika pada kasus tertentu, kita akhirnya tidak bisa melakukan find(), dan terpaksa harus
+     *   menggunakan kata kunci new, kita harus mengubah attribute $exists dari defaultnya false, menjadi
+     *   true, untuk memberi tahu Laravel bahwa data object itu ada di database
+     */
+
+    public function testUpdateCategory(){
+
+        // sql: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $this->seed(CategorySeeder::class);
+
+        // sql: select * from `categories` where `categories`.`id` = ? limit 1
+        // $category = Category::query()->find("Food");
+        $category = Category::find("Food");
+
+        // update data
+        $category->name = "Food Updated";
+        $category->description = "Food Description Updated";
+
+        // sql: update `categories` set `name` = ?, `description` = ? where `id` = ?
+        $result = $category->update();
+
+        self::assertTrue($result);
+
+        Log::info($category);
+
+        /**
+         * result:
+         * [2024-06-21 09:58:42] testing.INFO: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         * [2024-06-21 09:58:42] testing.INFO: select * from `categories` where `categories`.`id` = ? limit 1
+         * [2024-06-21 09:58:42] testing.INFO: update `categories` set `name` = ?, `description` = ? where `id` = ?
+         * [2024-06-21 09:58:42] testing.INFO: {"id":"FOOD","name":"Food Updated","description":"Food Description Updated","created_at":"2024-06-21 16:58:42"}
+         */
+
+    }
+
 }
