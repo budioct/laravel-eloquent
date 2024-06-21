@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
@@ -27,9 +28,12 @@ class CategoryTest extends TestCase
 
         self::assertTrue($result);
 
+        Log::info(json_encode($category));
+
         /**
          * result:
-         * [2024-06-16 06:38:22] testing.INFO: insert into `categories` (`id`, `name`) values (?, ?)
+         * [2024-06-19 06:24:25] testing.INFO: insert into `categories` (`id`, `name`) values (?, ?)
+         * [2024-06-19 06:24:25] testing.INFO: {"id":"GADGET","name":"Gadget"}
          */
 
     }
@@ -61,6 +65,60 @@ class CategoryTest extends TestCase
         // __callStatic()
         Category::query()->where();
         Category::where();
+
+    }
+
+    /**
+     * Insert Many
+     * ● Saat kita membuat aplikasi, kadang ada kasus dimana kita harus melakukan insert data Model lebih
+     *   dari satu, atau disebut bulk / batch
+     * ● Pada kasus ini, kita tidak perlu membuat object dari Model, kita cukup gunakan Query Builder
+     *   untuk melakukan insert banyak data sekaligus menggunakan array
+     */
+
+    public function testInsertManyCategory(){
+
+        $categories = [];
+        for ($i = 0; $i < 10; $i++) {
+            $categories[] = [
+                "id" => "ID $i",
+                "name" => "Name $i",
+            ]; // data di sisipkan ke array $categories[]
+        }
+
+        // sql: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+        // insert dengan 2 cara
+        //Category::query()->insert($categories); // insert(array $values) // insert lebih dari 1 data (multiple)
+        $result = Category::insert($categories); // hasil return bollean
+
+        self::assertTrue($result);
+
+        foreach ($categories as $category) {
+            Log::info(json_encode($category));
+        }
+
+        // sql: select count(*) as aggregate from `categories`
+        // check jumlah total data yang berhasil di insert ke table
+        // $total_data = Category::query()->count(); // count($columns = '*'): int // get total data dalam table
+        $total = Category::count();
+
+        self::assertEquals(10, $total);
+
+        /**
+         * result:
+         * [2024-06-19 06:22:59] testing.INFO: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 0","name":"Name 0"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 1","name":"Name 1"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 2","name":"Name 2"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 3","name":"Name 3"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 4","name":"Name 4"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 5","name":"Name 5"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 6","name":"Name 6"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 7","name":"Name 7"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 8","name":"Name 8"}
+         * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 9","name":"Name 9"}
+         * [2024-06-21 09:33:42] testing.INFO: select count(*) as aggregate from `categories`
+         */
 
     }
 
