@@ -40,6 +40,7 @@ class CategoryTest extends TestCase
 
     }
 
+
     /**
      * Query Builder
      * ● Setelah membuat Model, untuk melakukan operasi CRUD terhadap Model yang sudah kita buat,
@@ -69,6 +70,7 @@ class CategoryTest extends TestCase
         Category::where();
 
     }
+
 
     /**
      * Insert Many
@@ -126,6 +128,7 @@ class CategoryTest extends TestCase
 
     }
 
+
     /**
      * Find
      * ● Laravel menyediakan method dengan prefix find() di Query Builder untuk mendapatkan satu data
@@ -162,6 +165,7 @@ class CategoryTest extends TestCase
          */
 
     }
+
 
     /**
      * Update
@@ -202,6 +206,7 @@ class CategoryTest extends TestCase
          */
 
     }
+
 
     /**
      * Select
@@ -311,6 +316,7 @@ class CategoryTest extends TestCase
 
     }
 
+
     /**
      * Update Many
      * ● Pada kasus misal kita mau melakukan update yang bisa berdampak ke lebih dari satu data, kita
@@ -372,5 +378,39 @@ class CategoryTest extends TestCase
     }
 
 
+    /**
+     * Delete
+     * ● Untuk melakukan delete data, kita bisa menggunakan method delete() di object Model yang sudah
+     *   kita buat
+     * ● Untuk menggunakan delete(), kita harus melakukan find() data terlebih dahulu
+     * ● Sama seperti update data, jika kita terpaksa harus melakukan delete dengan membuat Model
+     *   dengan kata kunci new, kita harus mengubah attribute $exists dari false menjadi true
+     */
+
+    public function testDeleteCategory(){
+
+        // sql: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $this->seed(CategorySeeder::class);
+
+        // sql: select * from `categories` where `categories`.`id` = ? limit 1
+        $category = Category::query()->find("Food"); // find berdasarkan primary key id
+
+        // sql: delete from `categories` where `id` = ?
+        $result = $category->delete(); // delete() // hapus data
+        self::assertTrue($result);
+
+        // sql: select count(*) as aggregate from `categories`
+        $total = Category::query()->count();
+        self::assertEquals(0, $total);
+
+        /**
+         * result:
+         * [2024-06-21 15:42:16] testing.INFO: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         * [2024-06-21 15:42:16] testing.INFO: select * from `categories` where `categories`.`id` = ? limit 1
+         * [2024-06-21 15:42:16] testing.INFO: delete from `categories` where `id` = ?
+         * [2024-06-21 15:42:16] testing.INFO: select count(*) as aggregate from `categories`
+         */
+
+    }
 
 }
