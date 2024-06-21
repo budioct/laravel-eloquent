@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
+use function PHPUnit\Framework\assertNotNull;
 
 class CategoryTest extends TestCase
 {
@@ -118,6 +120,43 @@ class CategoryTest extends TestCase
          * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 8","name":"Name 8"}
          * [2024-06-19 06:22:59] testing.INFO: {"id":"ID 9","name":"Name 9"}
          * [2024-06-21 09:33:42] testing.INFO: select count(*) as aggregate from `categories`
+         */
+
+    }
+
+    /**
+     * Find
+     * ● Laravel menyediakan method dengan prefix find() di Query Builder untuk mendapatkan satu data
+     *   menggunakan primary key
+     * ● Ini lebih mudah dibanding melakukan select dimana mengembalikan data berupa array
+     *
+     * // select() akan return list array
+     * // find() akan return object model/entity
+     */
+
+    public function testFindCategory(){
+
+        // sql: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $this->seed(CategorySeeder::class); // seed($class = 'Database\\Seeders\\DatabaseSeeder') // use seeder // jalankan migration Seeder di unit test
+
+        // sql: select * from `categories` where `categories`.`id` = ? limit 1
+        // ada 2 cara
+        // $category = Category::query()->find("FOOD"); // find("PK"); // find data berdasarkan primary key
+        $category = Category::find("FOOD");
+
+        assertNotNull($category);
+
+        self::assertEquals("FOOD", $category->id);
+        self::assertEquals("Food", $category->name);
+        self::assertEquals("Food Category", $category->description);
+
+        Log::info(json_encode($category));
+
+        /**
+         * result:
+         * [2024-06-21 09:51:52] testing.INFO: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         * [2024-06-21 09:51:52] testing.INFO: select * from `categories` where `categories`.`id` = ? limit 1
+         * [2024-06-21 09:52:49] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","created_at":"2024-06-21 16:52:49"}
          */
 
     }
