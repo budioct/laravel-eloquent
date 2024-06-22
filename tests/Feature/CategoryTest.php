@@ -456,4 +456,127 @@ class CategoryTest extends TestCase
 
     }
 
+
+
+
+    /**
+     * Fillable Attributes
+     * ● Saat kita membuat object Model yang datanya dikirim dari Web Form atau Body HTTP Request
+     * ● Jika kita harus tambahkan satu persatu attribute nya ke object Model, maka itu sangat merepotkan
+     * ● Laravel memiliki fitur untuk membuat Model secara otomatis dengan menggunakan method
+     *   create(attributes) pada Query Builder
+     */
+
+    public function testCreateFillable(){
+
+        // contoh kasus ketika dapat  http request dan web request
+        $request = [
+            "id" => "FOOD",
+            "name" => "Food",
+            "description" => "Food Category",
+        ];
+
+        // ini ada exception supaya tiba tiba jika ada percobaan mengubah langsung beberapa data sekaligus.
+        // pada instance seperti ini bisa di laravel..
+        $category = new Category($request); // Category(request http/request web)
+
+        // seharunya kita binding attribute model dan attribute Request, seperti dibawah
+        // karna attribute $fillable kita tidak perlu melakukan binding seperti dibawah..
+        // tetapi dengan syarat daftarkan di model attribute $fillable supaya tidak kena exception MassAssignmentException
+        //$category->id = $request["id"]; // binding model dan http request / web request
+        //$category->name = $request["name"];
+        //$category->description = $request["description"];
+
+        // sql : insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $category->save();
+
+        self::assertNotNull($category->id);
+
+        /**
+         * result Gagal jika belum tambah attributes $fillable pada model:
+         * jika keluar exception
+         * Illuminate\Database\Eloquent\MassAssignmentException : Add [id] to fillable property to allow mass assignment on [App\Models\Category].
+         *
+         * error MassAssignmentException
+         * maksudnya ada percobaan mengubah langsung beberapa data sekaligus.
+         * jadi laravel menjaga jangan sampai tiba tiba ada orang yang bisa mengubah beberapa attribute sekaligus pada model, kenapa ini karna sangat berbahaya
+         *
+         *
+         *  Error : MassAssignmentException
+         *  ● Secara default, semua attribute di Model tidak bisa di set secara masal menggunakan method create()
+         *  ● Kenapa? Hal ini untuk menjaga agar tidak ada data salah yang akhirnya tidak sengaja mengubah
+         *    data di database, misal jika ada Model User, lalu terdapat attribute is_admin, jika sampai ada
+         *    request yang mengirim attribute is_admin: true, maka secara otomatis data di database akan diubah
+         *  ● Oleh karena itu, kita harus beri tahu ke Laravel, attribute mana saja yang bisa diubah secara masal
+         *  ● Kita bisa gunakan attribute $fillable di Model nya
+         *
+         * // result berhasil:
+         * insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         */
+
+    }
+
+    public function testCreateMethod(){
+
+        // contoh kasus ketika dapat  http request dan web request
+        $request = [
+            "id" => "FOOD",
+            "name" => "Food",
+            "description" => "Food Category",
+        ];
+
+        // sql : insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $category = Category::query()->create($request); // create(array $attributes = []) // menerima Request http atau web Request
+
+        self::assertNotNull($category->id);
+
+        /**
+         * result:
+         * [2024-06-22 07:45:34] testing.INFO: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         */
+
+    }
+
+    /**
+     * Update Model
+     * ● Bagaimana jika kita mau mengupdate object Model, tapi secara sekaligus
+     * ● Kita bisa menggunakan method fill(attributes) pada Model
+     */
+
+    public function testCreateMethodLaluUpdateDenganFillable(){
+
+        // sql: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+        $this->seed(CategorySeeder::class);
+        // sql: select * from `categories` where `categories`.`id` = ? limit 1
+        $category = Category::query()->find("FOOD"); // find() // mencari data berdasarkan primary_key
+        Log::info(json_encode($category));
+
+        // contoh kasus ketika dapat  http request dan web request
+        $request = [
+            "id" => "FOOD http request",
+            "name" => "Food http request",
+            "description" => "Food Category http request",
+        ];
+
+        $category->fill($request); // fill(array $attributes) // request http dan request web yang masuk tanpa harus binding Model attribute
+        Log::info(json_encode($category));
+
+        // sql : update `categories` set `id` = ?, `name` = ?, `description` = ? where `id` = ?
+        $category->save();
+
+        self::assertNotNull($category->id);
+        self::assertNotNull($category->name);
+        self::assertNotNull($category->description);
+
+        /**
+         * result:
+         * [2024-06-22 07:45:34] testing.INFO: insert into `categories` (`id`, `name`, `description`) values (?, ?, ?)
+         * [2024-06-22 07:45:34] testing.INFO: select * from `categories` where `categories`.`id` = ? limit 1
+         * [2024-06-22 07:45:34] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","created_at":"2024-06-22 14:45:34"}
+         * [2024-06-22 07:45:34] testing.INFO: {"id":"FOOD http request","name":"Food http request","description":"Food Category http request","created_at":"2024-06-22 14:45:34"}
+         * [2024-06-22 07:45:34] testing.INFO: update `categories` set `id` = ?, `name` = ?, `description` = ? where `id` = ?
+         */
+
+    }
+
 }

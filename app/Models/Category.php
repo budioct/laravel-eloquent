@@ -58,4 +58,12 @@ class Category extends Model
     public $incrementing = false; // $incrementing // deskripsi jika id type int / bigInt maka yang akan autoincrement pada table. default model laravel adalah true
     public $timestamps = false; // $timestamps adalah fitur laravel akan auto generate auto_create dan auto_update // default model laravel adalah true
 
+    // $fillable adalah supaya allow Request $request masuk dari http request dan web request. tanpa harus binding data attribute model/entity dan request key
+    // jadi ini bisa mempercepat pekerjaan di laravel
+    protected $fillable = [
+        "id",
+        "name",
+        "description",
+    ];
+
 }
