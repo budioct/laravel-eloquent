@@ -11,4 +11,7 @@ select * from categories;
 describe vouchers;
 select * from vouchers;
 
+describe comments;
+select * from comments;
+
 
