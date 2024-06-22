@@ -413,4 +413,47 @@ class CategoryTest extends TestCase
 
     }
 
+    /**
+     * Delete Many
+     * ● Pada kasus kita mau melakukan delete yang bisa berdampak pada banyak data, maka kita harus
+     * menggunakan Query Builder
+     */
+
+    public function testDeletManyCategory(){
+
+        // delete multiple (lebih dari 1 data)
+
+        $categories = [];
+        for ($i = 0; $i < 5; $i++) {
+            $categories[] = [
+                "id" => "ID $i",
+                "name" => "Name $i",
+            ]; // data di sisipkan ke array $categories[]
+        }
+
+        // sql: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+        $result = Category::insert($categories);
+        $this->assertTrue($result);
+
+        // sql: select count(*) as aggregate from `categories`
+        $total = Category::query()->count();
+        self::assertEquals(5, $total);
+
+        // sql: delete from `categories` where `description` is null
+        Category::query()->whereNull("description")->delete(); // delete // hapus data berdasarkan description yang null
+
+
+        $total = Category::query()->count();
+        self::assertEquals(0, $total);
+
+        /**
+         * result:
+         * [2024-06-22 04:56:09] testing.INFO: insert into `categories` (`id`, `name`) values (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)
+         * [2024-06-22 04:56:09] testing.INFO: select count(*) as aggregate from `categories`
+         * [2024-06-22 04:56:09] testing.INFO: delete from `categories` where `description` is null
+         * [2024-06-22 04:56:09] testing.INFO: select count(*) as aggregate from `categories`
+         */
+
+    }
+
 }
