@@ -8,4 +8,7 @@ describe categories;
 
 select * from categories;
 
+describe vouchers;
+select * from vouchers;
+
 
