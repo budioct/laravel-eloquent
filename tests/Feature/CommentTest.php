@@ -55,4 +55,41 @@ class CommentTest extends TestCase
 
     }
 
+
+    /**
+     * Default Attribute Values
+     * ● Saat kita membuat tabel, kita bisa membuat default value, namun kadang itu kurang flexible karena
+     *   kita tidak bisa mengubah-ubah secara mudah
+     * ● Laravel Model memiliki fitur default attribute values, dimana kita bisa membuat default value
+     *   untuk attributes di Model, sehingga ketika pertama kali dibuat object Model nya, secara otomatis
+     *   default value nya mengikuti yang sudah kita tetapkan
+     * ● Untuk menentukan default values, kita bisa menggunakan attribute $attributes yang berisi
+     *   associative array kolom => default value
+     */
+
+    public function testDefaultAttributeValues(){
+
+        $comment = new Comment();
+        $comment->email = "budioct@test.com";
+
+        // kita tidak perlu set column title dan comment.. nanti akan di set $attributes default value pada model
+        //$comment->title = "Sample title";
+        //$comment->comment = "Sample comment";
+
+        // sql: insert into `comments` (`title`, `comment`, `email`, `updated_at`, `created_at`) values (?, ?, ?, ?, ?)
+        $result = $comment->save();
+
+        self::assertTrue($result);
+        self::assertNotNull($comment->title);
+        self::assertNotNull($comment->comment);
+        Log::info(json_encode($comment));
+
+        /**
+         * result:
+         * [2024-06-22 06:51:28] testing.INFO: insert into `comments` (`title`, `comment`, `email`, `updated_at`, `created_at`) values (?, ?, ?, ?, ?)
+         * [2024-06-22 06:51:28] testing.INFO: {"title":"Sample Title","comment":"Sample Comment","email":"budioct@test.com","updated_at":"2024-06-22T06:51:28.000000Z","created_at":"2024-06-22T06:51:28.000000Z","id":2}
+         */
+
+    }
+
 }
