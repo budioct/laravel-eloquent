@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Scopes\IsActiveScope;
+use App\Models\Voucher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -54,6 +55,9 @@ class QueryScopeTest extends TestCase
      *  ● Kadang kita butuh mematikan Global Scope
      *  ● Kita bisa menggunakan method withoutGlobalScope(array) pada Query Builder dengan parameter
      *    daftar Global Scope yang ingin kita hilangkan
+     *
+     *  note: query local scope akan aktif query tambahan ketika kita panggil method yang telah kita buat di model/entity
+     *        query global scope akan selalu aktif keti tidak di panggil
      */
 
     public function testGlobalScope(){
@@ -79,6 +83,62 @@ class QueryScopeTest extends TestCase
          * result:
          * [2024-06-23 03:50:27] testing.INFO: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
          * [2024-06-23 03:50:27] testing.INFO: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+         */
+
+    }
+
+
+    /**
+     * Query Local Scope
+     * ● Selain Global Scope, terdapat Local Scope, perbedaan dari Local Scope adalah, secara default tidak
+     *   akan aktif, kecuali kita mengaktifkannya ketika melakukan Query
+     * ● Untuk membuat Local Scope, kita bisa membuat method di Model dengan awalan scope lalu diikuti
+     *   dengan nama scope nya, misal scopeActive(), scopeNonActive(), dan lain-lain
+     * ● Method untuk Local Scope memerlukan parameter Builder yang bisa kita gunakan untuk
+     *   menggunakan menambah kondisi
+     * ● https://laravel.com/api/10.x/Illuminate/Database/Eloquent/Builder.html
+     *
+     * Menggunakan Query Local Scope
+     * ● Untuk menggunakan Local Scope, kita bisa memanggil method nya, diawali dengan lowercase, dan
+     *   tanpa prefix scope, ketika menggunakan Builder, misal :
+     * ● Local Scope scopeActive(), dipanggil active()
+     * ● Local Scope scopeNonActive(), dipanggil nonActive()
+     *
+     * // buat migration
+     * // set method di model/entity untuk query local scope
+     *
+     * note: query local scope akan aktif query tambahan ketika kita panggil method yang telah kita buat di model/entity
+     *       query global scope akan selalu aktif keti tidak di panggil
+     */
+
+    public function testLocalScope(){
+
+        $voucher = new Voucher();
+        $voucher->name = "Sample Voucher";
+        $voucher->is_active = true;
+
+        // sql: insert into `vouchers` (`name`, `is_active`, `id`, `voucher_code`) values (?, ?, ?, ?)
+        $voucher->save();
+
+        // test ketika query tanpa menggunakan query local scope (startard laravel)
+        // sql: select count(*) as aggregate from `vouchers` where `vouchers`.`deleted_at` is null
+        $total = Voucher::query()->count();
+        self::assertEquals(1, $total);
+
+        // sql: select count(*) as aggregate from `vouchers` where `is_active` = ? and `vouchers`.`deleted_at` is null // `is_active` = ? .. true
+        $total = Voucher::query()->active()->count();
+        self::assertEquals(1, $total);
+
+        // sql: select count(*) as aggregate from `vouchers` where `is_active` = ? and `vouchers`.`deleted_at` is null // `is_active` = ? .. false
+        $total = Voucher::query()->nonActive()->count();
+        self::assertEquals(0, $total);
+
+        /**
+         * result:
+         * [2024-06-23 05:34:08] testing.INFO: insert into `vouchers` (`name`, `is_active`, `id`, `voucher_code`) values (?, ?, ?, ?)
+         * [2024-06-23 05:34:08] testing.INFO: select count(*) as aggregate from `vouchers` where `vouchers`.`deleted_at` is null
+         * [2024-06-23 05:34:08] testing.INFO: select count(*) as aggregate from `vouchers` where `is_active` = ? and `vouchers`.`deleted_at` is null
+         * [2024-06-23 05:34:08] testing.INFO: select count(*) as aggregate from `vouchers` where `is_active` = ? and `vouchers`.`deleted_at` is null
          */
 
     }
