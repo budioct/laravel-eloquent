@@ -13,8 +13,17 @@ select * from vouchers;
 describe comments;
 select * from comments;
 
+# one to one
 describe customers;
 describe wallets;
+select * from customers;
+select * from wallets;
+
+# one to many
+describe categories;
+describe products;
+select * from categories;
+select * from products;
 
 
 
