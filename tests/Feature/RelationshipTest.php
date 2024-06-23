@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\Wallet;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\WalletSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,13 +53,19 @@ class RelationshipTest extends TestCase
 
         // sql: select * from `customers` where `customers`.`id` = ? limit 1
         $customer = Customer::query()->find("BUDHI");
+
         self::assertNotNull($customer);
         self::assertEquals("BUDHI", $customer->id);
         Log::info(json_encode($customer)); // {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
 
+        // kita tidak perlu query seperti ini lagi
+        //$wallet = Wallet::query()->where("customer_id", $customer->id)->first();
+
+        // ingat bukan memangil methodnya melainkan property nya
         // untuk mengakses model/entity wallet hasil dari query Customer.wallet() seperti $customer.wallet // method wallet() menjadi property
         // select * from `wallets` where `wallets`.`customer_id` = ? and `wallets`.`customer_id` is not null limit 1
-        $wallet = $customer->wallet;
+        $wallet = $customer->wallet;// akses model wallet dari model customer
+
         self::assertNotNull($wallet);
         self::assertEquals("BUDHI", $wallet->customer_id);
         self::assertEquals(7000, $wallet->amount);
