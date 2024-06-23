@@ -13,4 +13,8 @@ select * from vouchers;
 describe comments;
 select * from comments;
 
+describe customers;
+describe wallets;
+
+
 
