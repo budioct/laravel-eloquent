@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Voucher extends Model
 {
     use HasUuids; // kita gunakan trait HasUuids untuk handle primary key UUID di model/entity laravel
+    use SoftDeletes; // kita gunakan trait SoftDeletes untuk  impl softDelete pada model/entity laravel.. akan handle query dan soft_delete update column "deleted_at"
 
     // secara default UUID hanya mengebalikan primaryKey saja.. tetapi kita bisa costom untuk salah satu column yang mau kita set UUID juga
     // overrid method uniqueIds() dari trait HasUuids
