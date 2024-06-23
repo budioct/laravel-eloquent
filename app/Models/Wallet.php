@@ -21,9 +21,9 @@ class Wallet extends Model
     public function customer(): BelongsTo
     {
         // belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null)
-        // $related: Customer::class // model/entity yang berelasi
+        // $related:    Customer::class // model/entity yang berelasi
         // $foreignKey: customer_id (FK) di table wallets
-        // $ownerKey: id PK dari table customers reference customer_id (FK) di table wallets
+        // $ownerKey:   id PK dari table customers reference customer_id (FK) di table wallets
         return $this->belongsTo(Customer::class, "customer_id", "id");
     }
 

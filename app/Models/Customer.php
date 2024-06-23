@@ -20,9 +20,9 @@ class Customer extends Model
     public function wallet(): HasOne
     {
         // hasOne($related, $foreignKey = null, $localKey = null)
-        // $related: Wallet::class // model/entity yang berelasi
+        // $related:    Wallet::class // model/entity yang berelasi
         // $foreignKey: customer_id (FK) di table wallets
-        // $localKey: id PK dari table "customers"
+        // $localKey:   id PK dari table "customers"
         return $this->hasOne(Wallet::class, 'customer_id', 'id');
     }
 
