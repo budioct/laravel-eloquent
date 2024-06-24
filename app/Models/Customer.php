@@ -23,7 +23,7 @@ class Customer extends Model
         // $related:    Wallet::class // model/entity yang berelasi
         // $foreignKey: customer_id (FK) di table wallets
         // $localKey:   id PK dari table "customers"
-        return $this->hasOne(Wallet::class, 'customer_id', 'id');
+        return $this->hasOne(Wallet::class, 'customer_id', 'id'); // CONSTRAINT `wallets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
     }
 
 }

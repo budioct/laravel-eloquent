@@ -24,7 +24,7 @@ class Wallet extends Model
         // $related:    Customer::class // model/entity yang berelasi
         // $foreignKey: customer_id (FK) di table wallets
         // $ownerKey:   id PK dari table customers reference customer_id (FK) di table wallets
-        return $this->belongsTo(Customer::class, "customer_id", "id");
+        return $this->belongsTo(Customer::class, "customer_id", "id"); // CONSTRAINT `wallets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
     }
 
 }
