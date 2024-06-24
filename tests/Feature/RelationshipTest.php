@@ -284,4 +284,56 @@ class RelationshipTest extends TestCase
     }
 
 
+
+    /**
+     * Has One of Many (mengabil salah satu data dari relasi one to many)
+     * ● Saat kita membuat relasi One to Many, kadang kita ingin mendapatkan salah satu data saja pada
+     *   relasi One to Many nya
+     * ● Contoh pada relasi One to Many Category dan Product, kita ingin mengambil satu product
+     *   Termurah atau Termahal di Category tersebut
+     * ● Sebenarnya kita bisa lakukan secara manual menggunakan Query Builder
+     * ● Namun Laravel menyediakan relasi Has One of Many yang bisa digunakan untuk mempermudah
+     *   hal ini
+     */
+
+
+    public function testHashOneOfMany(){
+
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        // sql: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+        $category = Category::query()->find("FOOD");
+        Log::info($category);
+
+        // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null order by `price` asc limit 1
+        $cheapestProduct = $category->cheapestProduct;
+        self::assertNotNull($cheapestProduct);
+        self::assertEquals("1", $cheapestProduct->id);
+        self::assertEquals(0, $cheapestProduct->price);
+        Log::info($cheapestProduct);
+
+        // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null order by `price` desc limit 1
+        $mostExpensiveProducts = $category->mostExpensiveProducts;
+        self::assertNotNull($mostExpensiveProducts);
+        self::assertEquals("2", $mostExpensiveProducts->id);
+        self::assertEquals(1000, $mostExpensiveProducts->price);
+        Log::info($mostExpensiveProducts);
+
+        /**
+         * result:
+         * [2024-06-24 03:12:26] testing.INFO: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
+         * [2024-06-24 03:12:27] testing.INFO: insert into `products` (`id`, `name`, `description`, `category_id`) values (?, ?, ?, ?)
+         * [2024-06-24 03:12:27] testing.INFO: insert into `products` (`id`, `name`, `description`, `price`, `category_id`) values (?, ?, ?, ?, ?)
+         * [2024-06-24 03:12:27] testing.INFO: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+         * [2024-06-24 03:12:27] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","created_at":"2024-06-24 10:12:26","is_active":1}
+         * [2024-06-24 03:12:27] testing.INFO: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null order by `price` asc limit 1
+         * [2024-06-24 03:12:27] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
+         * [2024-06-24 03:12:27] testing.INFO: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null order by `price` desc limit 1
+         * [2024-06-24 03:12:27] testing.INFO: {"id":"2","name":"Product 2","description":"Description 2","price":1000,"stock":0,"category_id":"FOOD"}
+         */
+
+    }
+
+
+
 }

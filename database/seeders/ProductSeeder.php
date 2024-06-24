@@ -20,7 +20,14 @@ class ProductSeeder extends Seeder
         $product->name = "Product 1";
         $product->description = "Description 1";
         $product->category_id = "FOOD";
-
         $product->save();
+
+        $product2 = new Product();
+        $product2->id = "2";
+        $product2->name = "Product 2";
+        $product2->description = "Description 2";
+        $product2->price = 1000;
+        $product2->category_id = "FOOD";
+        $product2->save();
     }
 }

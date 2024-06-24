@@ -6,6 +6,7 @@ use App\Models\Scopes\IsActiveScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Category extends Model
 {
@@ -83,7 +84,19 @@ class Category extends Model
         // $related:    Product::class // model/entity yang berelasi
         // $foreignKey: category_id (FK) di table products
         // $localKey:   id PK dari table "categories"
-        return $this->hasMany(Product::class, 'category_id', "id");
+        return $this->hasMany(Product::class, 'category_id', "id"); // CONSTRAINT `products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
+    }
+
+    // "Has One of Many" digunakan untuk mengambil salah satu data sesuai kondisi, dari relasi 1 ~ Many
+    // return value method 'HasOne'
+    public function cheapestProduct(): HasOne
+    {
+        return $this->hasOne(Product::class, "category_id", "id")->oldest("price"); // oldest() akan order by `price` asc limit 1
+    }
+
+    public function mostExpensiveProducts(): HasOne
+    {
+        return $this->hasOne(Product::class, "category_id", "id")->latest("price"); // oldest() akan order by `price` desc limit 1
     }
 
 }

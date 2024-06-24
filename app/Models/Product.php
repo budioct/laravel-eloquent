@@ -25,7 +25,7 @@ class Product extends Model
         // $related:    Category::class // model/entity yang berelasi
         // $foreignKey: category_id (FK) di table products
         // $ownerKey:   id PK dari table categories reference category_id (FK) di table products
-        return $this->belongsTo(Category::class, 'category_id', 'id');
+        return $this->belongsTo(Category::class, 'category_id', 'id'); // CONSTRAINT `products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
     }
 
 }
