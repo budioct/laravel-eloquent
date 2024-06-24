@@ -165,4 +165,123 @@ class RelationshipTest extends TestCase
 
     }
 
+
+    /**
+     * Query Builder pada Relationship
+     * ● Semua class relationship di Laravel adalah turunan dari Builder, dari HasOne, HasMany, BelongsTo
+     *   sampai BelongsToMany
+     * ● Artinya, sebenarnya untuk melakukan proses CRUD, kisa bisa menggunakan method relationship,
+     *   untuk mempermudah
+     *
+     * note: jika kita ingi melakukan save(), delete(), update(), select(), find(), etc..
+     * kita gunakan method relasi model dengan return HasOne, HasMany, BelongsTo, karna turunan dari Builder (Eloquent)
+     */
+
+    public function testOneToOneQuery(){
+
+        // customers one ~ one vouchers
+
+        $customer = new Customer();
+        $customer->id = "BUDHI";
+        $customer->name = "budhi";
+        $customer->email = "budhi@test.com";
+
+        // sql: insert into `customers` (`id`, `name`, `email`) values (?, ?, ?)
+        $customer->save();
+        Log::info(json_encode($customer));
+
+        $wallet = new Wallet();
+        $wallet->amount = 10000;
+
+        // sql: insert into `wallets` (`amount`, `customer_id`) values (?, ?)
+        $customer->wallet()->save($wallet); // ini akan simpan customers.id sebagai FK table vouchers.customer_id
+        Log::info(json_encode($wallet));
+
+        self::assertNotNull($wallet->customer_id);
+        self::assertEquals("BUDHI",$wallet->customer_id);
+
+        /**
+         * result:
+         * [2024-06-24 01:12:49] testing.INFO: insert into `customers` (`id`, `name`, `email`) values (?, ?, ?)
+         * [2024-06-24 01:12:49] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-24 01:12:49] testing.INFO: insert into `wallets` (`amount`, `customer_id`) values (?, ?)
+         * [2024-06-24 01:12:49] testing.INFO: {"amount":10000,"customer_id":"BUDHI","id":7}
+         */
+
+    }
+
+    public function testOneToManyQuery()
+    {
+
+        // categories one ~ many products
+
+        $category = new Category();
+        $category->id = "FOOD";
+        $category->name = "Food";
+        $category->description = "Food Category";
+        $category->is_active = true;
+
+        // sql: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
+        $category->save();
+        Log::info(json_encode($category));
+
+        $product = new Product();
+        $product->id = "1";
+        $product->name = "Product 1";
+        $product->description = "Description 1";
+
+        // sql: insert into `products` (`id`, `name`, `description`, `category_id`) values (?, ?, ?, ?)
+        $category->products()->save($product);
+        Log::info(json_encode($product));
+
+        self::assertNotNull($product->category_id);
+        self::assertEquals("FOOD",$product->category_id);
+
+        /**
+         * result:
+         * [2024-06-24 01:29:39] testing.INFO: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
+         * [2024-06-24 01:29:39] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","is_active":true}
+         * [2024-06-24 01:29:39] testing.INFO: insert into `products` (`id`, `name`, `description`, `category_id`) values (?, ?, ?, ?)
+         * [2024-06-24 01:29:39] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","category_id":"FOOD"}
+         */
+
+    }
+
+    public function testRelationshipQuery()
+    {
+        // sql: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
+        // sql: insert into `products` (`id`, `name`, `description`, `category_id`) values (?, ?, ?, ?)
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        // sql: elect * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+        $category = Category::find("FOOD");
+        Log::info($category);
+
+        // query jika ingin get all product berdasarkan id categirues
+        // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null
+        $products = $category->products;
+        self::assertCount(1, $products);
+        Log::info($products);
+
+        // query untuk mendapatkan data berdasarkan ketentuan kondisi
+        // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null and `stock` <= ?
+        $outOfStockProducts = $category->products()->where('stock', '<=', 0)->get();
+        self::assertCount(1, $outOfStockProducts);
+        Log::info($outOfStockProducts);
+
+        /**
+         * result:
+         * [2024-06-24 01:52:20] testing.INFO: insert into `categories` (`id`, `name`, `description`, `is_active`) values (?, ?, ?, ?)
+         * [2024-06-24 01:52:20] testing.INFO: insert into `products` (`id`, `name`, `description`, `category_id`) values (?, ?, ?, ?)
+         * [2024-06-24 01:52:20] testing.INFO: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+         * [2024-06-24 01:52:20] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","created_at":"2024-06-24 08:52:20","is_active":1}
+         * [2024-06-24 01:52:20] testing.INFO: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null
+         * [2024-06-24 01:52:20] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}]
+         * [2024-06-24 01:52:20] testing.INFO: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null and `stock` <= ?
+         * [2024-06-24 01:52:20] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}]
+         */
+
+    }
+
+
 }
