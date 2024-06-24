@@ -6,6 +6,7 @@ use App\Models\Scopes\IsActiveScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Category extends Model
@@ -97,6 +98,22 @@ class Category extends Model
     public function mostExpensiveProducts(): HasOne
     {
         return $this->hasOne(Product::class, "category_id", "id")->latest("price"); // oldest() akan order by `price` desc limit 1
+    }
+
+    // Has Many Through (memiliki Banyak Melalui)
+    // skema relasi "categories" one to many "products" one to many "reviews"
+    // secara tidak langsung categories punya relasi ke reviews dari products
+    // jadi ingin langsung saja data dari categories query yang ada di reviews tanpa harus lewat products.. di sebut Has Many Through
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Review::class, // table reviews yang langsung relasi table categories
+            Product::class, // table products yang di lewati
+            "category_id",  // FK on products table
+            "product_id", // FK on reviews table
+            "id", // PK on categories table
+            "id" // PK on products table
+        );
     }
 
 }

@@ -9,6 +9,7 @@ use App\Models\Wallet;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\ReviewSeeder;
 use Database\Seeders\VirtualAccountSeeder;
 use Database\Seeders\WalletSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -361,6 +362,7 @@ class RelationshipTest extends TestCase
         self::assertNotNull($customer);
         self::assertEquals("budhi",$customer->name);
 
+        // dari customers langsung ke virtual_accounts
         // sql: select `virtual_accounts`.*, `wallets`.`customer_id` as `laravel_through_key` from `virtual_accounts` inner join `wallets` on `wallets`.`id` = `virtual_accounts`.`wallet_id` where `wallets`.`customer_id` = ? limit 1
         $virtualAccount = $customer->virtualAccount;
         self::assertNotNull($virtualAccount);
@@ -379,6 +381,48 @@ class RelationshipTest extends TestCase
 
     }
 
+
+
+
+    /**
+     * Has Many Through
+     * ● Selain Has One Through, Laravel juga bisa digunakan untuk mengambil relasi One to Many melalui
+     *   Model lain
+     * ● Contoh misal pada kasus kita, kita punya model Category yang berelasi One to Many dengan
+     *   Product. Misal Product memiliki relasi One to Many lagi ke model Review
+     * ● Kita bisa membuat relasi One to Many dari Category ke Review melewati model Product
+     */
+
+    public function testHasManyThrough(){
+
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            CustomerSeeder::class,
+            ReviewSeeder::class
+        ]);
+
+        // sql: testing.INFO: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+        $category = Category::query()->find("FOOD");
+        self::assertNotNull($category);
+        Log::info(json_encode($category));
+
+        // dari categories langsung ke reviews
+        // sql: select `reviews`.*, `products`.`category_id` as `laravel_through_key` from `reviews` inner join `products` on `products`.`id` = `reviews`.`product_id` where `products`.`category_id` = ?
+        $reviews = $category->reviews;
+        self::assertNotNull($reviews);
+        self::assertCount(2, $reviews);
+        Log::info(json_encode($reviews));
+
+        /**
+         * result:
+         * [2024-06-24 12:59:06] testing.INFO: select * from `categories` where `categories`.`id` = ? and `is_active` = ? limit 1
+         * [2024-06-24 12:59:06] testing.INFO: {"id":"FOOD","name":"Food","description":"Food Category","created_at":"2024-06-24 19:59:06","is_active":1}
+         * [2024-06-24 12:59:06] testing.INFO: select `reviews`.*, `products`.`category_id` as `laravel_through_key` from `reviews` inner join `products` on `products`.`id` = `reviews`.`product_id` where `products`.`category_id` = ?
+         * [2024-06-24 12:59:06] testing.INFO: [{"id":17,"product_id":"1","customer_id":"BUDHI","rating":5,"comment":"Bagus Banget","laravel_through_key":"FOOD"},{"id":18,"product_id":"2","customer_id":"BUDHI","rating":3,"comment":"Lumayan","laravel_through_key":"FOOD"}]
+         */
+
+    }
 
 
 }

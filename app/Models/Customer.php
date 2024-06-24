@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
@@ -40,6 +41,17 @@ class Customer extends Model
             "id", // PK on customers table
             "id" // PK on wallets table
         );
+    }
+
+    // buat method untuk relasi customers 1 ~ Many ke table reviews
+    // dimana return value method HasMany (Punya banyak), menentukan memiliki relasi banyak
+    // nama method bebas
+    public function reviews(): HasMany{
+        // hasMany($related, $foreignKey = null, $localKey = null)
+        // $related:    Review::class // model/entity yang berelasi
+        // $foreignKey: customer_id (FK) di table products
+        // $localKey:   id PK dari table "customers"
+        return $this->hasMany(Review::class, "customer_id", "id");
     }
 
 }

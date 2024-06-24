@@ -28,5 +28,8 @@ describe products;
 select * from categories;
 select * from products;
 
+describe reviews;
+select * from reviews;
+
 
 

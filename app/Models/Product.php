@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -26,6 +27,17 @@ class Product extends Model
         // $foreignKey: category_id (FK) di table products
         // $ownerKey:   id PK dari table categories reference category_id (FK) di table products
         return $this->belongsTo(Category::class, 'category_id', 'id'); // CONSTRAINT `products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
+    }
+
+    // buat method untuk relasi products 1 ~ Many ke table reviews
+    // dimana return value method HasMany (Punya banyak), menentukan memiliki relasi banyak
+    // nama method bebas
+    public function reviews(): HasMany {
+        // hasMany($related, $foreignKey = null, $localKey = null)
+        // $related:    Review::class // model/entity yang berelasi
+        // $foreignKey: product_id (FK) di table products
+        // $localKey:   id PK dari table "products"
+        return $this->hasMany(Review::class, "product_id", "id");
     }
 
 }
