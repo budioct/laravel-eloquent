@@ -9,6 +9,7 @@ use App\Models\Wallet;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\VirtualAccountSeeder;
 use Database\Seeders\WalletSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -330,6 +331,50 @@ class RelationshipTest extends TestCase
          * [2024-06-24 03:12:27] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
          * [2024-06-24 03:12:27] testing.INFO: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null order by `price` desc limit 1
          * [2024-06-24 03:12:27] testing.INFO: {"id":"2","name":"Product 2","description":"Description 2","price":1000,"stock":0,"category_id":"FOOD"}
+         */
+
+    }
+
+
+
+
+    /**
+     * Has One Through
+     * ● Saat kita membuat relasi One to One, kadang kita buat relasi One to One yang melewati Lebih dari
+     *   satu Model
+     * ● Contoh, Customer punya satu Wallet, dan Wallet punya satu Virtual Account
+     * ● Kita bisa membuat relasi Customer ke Virtual Account, dengan relasi One to One yang melewati
+     *   Model Wallet
+     */
+
+    public function testHasOneThrough(){
+
+        $this->seed([
+            CustomerSeeder::class,
+            WalletSeeder::class,
+            VirtualAccountSeeder::class
+        ]);
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::query()->find("BUDHI");
+
+        self::assertNotNull($customer);
+        self::assertEquals("budhi",$customer->name);
+
+        // sql: select `virtual_accounts`.*, `wallets`.`customer_id` as `laravel_through_key` from `virtual_accounts` inner join `wallets` on `wallets`.`id` = `virtual_accounts`.`wallet_id` where `wallets`.`customer_id` = ? limit 1
+        $virtualAccount = $customer->virtualAccount;
+        self::assertNotNull($virtualAccount);
+        self::assertEquals("BCA", $virtualAccount->bank);
+        self::assertEquals("2222333344", $virtualAccount->va_number);
+
+        /**
+         * result:
+         * [2024-06-24 10:00:18] testing.INFO: insert into `customers` (`id`, `name`, `email`) values (?, ?, ?)
+         * [2024-06-24 10:00:18] testing.INFO: insert into `wallets` (`amount`, `customer_id`) values (?, ?)
+         * [2024-06-24 10:00:18] testing.INFO: select * from `wallets` where `customer_id` = ? limit 1
+         * [2024-06-24 10:00:18] testing.INFO: insert into `virtual_accounts` (`bank`, `va_number`, `wallet_id`) values (?, ?, ?)
+         * [2024-06-24 10:00:18] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-24 10:00:18] testing.INFO: select `virtual_accounts`.*, `wallets`.`customer_id` as `laravel_through_key` from `virtual_accounts` inner join `wallets` on `wallets`.`id` = `virtual_accounts`.`wallet_id` where `wallets`.`customer_id` = ? limit 1
          */
 
     }

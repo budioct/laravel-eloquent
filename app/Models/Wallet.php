@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Wallet extends Model
 {
@@ -25,6 +26,12 @@ class Wallet extends Model
         // $foreignKey: customer_id (FK) di table wallets
         // $ownerKey:   id PK dari table customers reference customer_id (FK) di table wallets
         return $this->belongsTo(Customer::class, "customer_id", "id"); // CONSTRAINT `wallets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
+    }
+
+    // table wallets one to one virtual_accounts
+    public function virtualAccount(): HasOne
+    {
+        return $this->hasOne(VirtualAccount::class, "wallet_id", "id");
     }
 
 }

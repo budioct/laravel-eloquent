@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Customer extends Model
 {
@@ -24,6 +25,21 @@ class Customer extends Model
         // $foreignKey: customer_id (FK) di table wallets
         // $localKey:   id PK dari table "customers"
         return $this->hasOne(Wallet::class, 'customer_id', 'id'); // CONSTRAINT `wallets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
+    }
+
+    // Has One Through (memiliki Satu Melalui)
+    // skema relasi "customers" one to one "wallets" one to one "virtual_accouts"
+    // secara tidak langsung customers punya relasi ke virtual_accouts dari wallets
+    // jadi ingin langsung saja data dari customers query yang ada di virtual_accouts tanpa harus lewat wallets.. di sebut Has One Through
+    public function virtualAccount(): HasOneThrough{
+        return $this->hasOneThrough(
+            VirtualAccount::class, // table virtual_accounts yang langsung relasi table customers
+            Wallet::class, // table wallets yang di lewati
+            "customer_id", // FK on wallets table
+            "wallet_id", // FK on virtual_accounts table
+            "id", // PK on customers table
+            "id" // PK on wallets table
+        );
     }
 
 }

@@ -16,8 +16,11 @@ select * from comments;
 # one to one
 describe customers;
 describe wallets;
+describe virtual_accounts;
+
 select * from customers;
 select * from wallets;
+select * from virtual_accounts;
 
 # one to many
 describe categories;
