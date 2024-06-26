@@ -22,6 +22,13 @@ return new class extends Migration
 
             $table->foreign("product_id")->on("products")->references("id"); // CONSTRAINT `reviews_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
             $table->foreign("customer_id")->on("customers")->references("id"); // CONSTRAINT `reviews_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
+
+            /**
+             * show create table reviews
+             *
+             */
+
+
         });
     }
 

@@ -19,6 +19,18 @@ return new class extends Migration
             $table->string("voucher_code", 200)->nullable(false);
             $table->timestamp("create_at")->nullable(false)->useCurrent(); // jadi create_at akan dibuat setiap kali kita create data baru
 
+            /**
+             * show create table vouchers
+             *
+             * CREATE TABLE `vouchers` (
+             * `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+             * `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+             * `voucher_code` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+             * `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+             * PRIMARY KEY (`id`)
+             * ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+             */
+
         });
     }
 

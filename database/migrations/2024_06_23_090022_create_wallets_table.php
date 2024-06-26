@@ -18,6 +18,12 @@ return new class extends Migration
             $table->string("customer_id", 100)->nullable(false);
             $table->bigInteger("amount")->nullable(false)->default(0);
             $table->foreign("customer_id")->on("customers")->references("id"); // CONSTRAINT `wallets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)
+
+            /**
+             * show create table wallets
+             *
+             */
+
         });
     }
 

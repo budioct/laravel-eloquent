@@ -22,6 +22,20 @@ return new class extends Migration
             $table->string("title", 200)->nullable(false);
             $table->text("comment")->nullable(true);
             $table->timestamps(); // akan generate create_at dan updated_at
+
+            /**
+             * show create table comments
+             *
+             * CREATE TABLE `comments` (
+             * `id` int NOT NULL AUTO_INCREMENT,
+             * `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+             * `title` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+             * `comment` text COLLATE utf8mb4_unicode_ci,
+             * `created_at` timestamp NULL DEFAULT NULL,
+             * `updated_at` timestamp NULL DEFAULT NULL,
+             * PRIMARY KEY (`id`)
+             * ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+             */
         });
     }
 

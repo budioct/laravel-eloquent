@@ -18,6 +18,13 @@ return new class extends Migration
     {
         Schema::table('vouchers', function (Blueprint $table) {
             $table->softDeletes(); // akan generate delete_at
+
+            /**
+             * show alter table vouchers,, add column deleted_at
+             *
+             * alter table vouchers add column `deleted_at` timestamp NULL DEFAULT NULL;
+             */
+
         });
     }
 

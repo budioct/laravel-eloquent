@@ -17,6 +17,12 @@ return new class extends Migration
             $table->string("id", 100)->nullable(false)->primary();
             $table->string("name", 100)->nullable(false);
             $table->string("email", 100)->nullable(false)->unique("customer_email"); // unique("column_name") // supaya nama email unique tidak ada yang boleh sama
+
+            /**
+             * show create table customers
+             *
+             */
+
         });
     }
 

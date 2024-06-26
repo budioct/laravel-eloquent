@@ -15,6 +15,13 @@ return new class extends Migration
     {
         Schema::table('vouchers', function (Blueprint $table) {
             $table->boolean('is_active')->nullable()->default(true);
+
+            /**
+             * show alter table vouchers,, add column is_active
+             *
+             * alter table vouchers add column `is_active` tinyint(1) DEFAULT '1';
+             */
+
         });
     }
 

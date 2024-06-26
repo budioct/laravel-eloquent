@@ -21,6 +21,12 @@ return new class extends Migration
             $table->integer("stock")->nullable(false)->default(0);
             $table->string("category_id", 100)->nullable(false);
             $table->foreign("category_id")->references("id")->on("categories");
+
+            /**
+             * show create table products
+             *
+             */
+
         });
     }
 

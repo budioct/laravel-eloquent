@@ -19,6 +19,12 @@ return new class extends Migration
             $table->string("bank", 100)->nullable(false);
             $table->string("va_number", 100)->nullable(false);
             $table->foreign("wallet_id")->on("wallets")->references("id"); // CONSTRAINT `virtual_accounts_wallet_id_foreign` FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`)
+
+            /**
+             * show create table virtual_accounts
+             *
+             */
+
         });
     }
 

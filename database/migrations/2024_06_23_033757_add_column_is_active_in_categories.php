@@ -15,6 +15,13 @@ return new class extends Migration
     {
         Schema::table('categories', function (Blueprint $table) {
             $table->boolean('is_active')->default(false); // column is_active ini jika null nilai defaultnya akan di isi false
+
+            /**
+             * show alter table categories,, add column is_active
+             *
+             * alter table vouchers add column `is_active` tinyint(1) NOT NULL DEFAULT '0';
+             */
+
         });
     }
 
