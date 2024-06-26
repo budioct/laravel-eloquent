@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Facades\Date;
 
 class Customer extends Model
 {
@@ -63,7 +64,24 @@ class Customer extends Model
         // $table: table pivot untuk jembatan M to M
         // $foreignPivotKey: PK dan FK di table pivot dari table M to M (pertama)
         // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
-        return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id");
+        // withPivot(name_column): supaya column ketika di query terbaca.. karna ini adalah column tambahan (costum)
+        return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id")
+            ->withPivot("created_at");
+    }
+
+    // buat method untuk relasi many ~ many ke table products
+    // dengan filter seminggu terakhir dari dibuat dari berdarkan column created_at
+    public function likeProductsLastWeek(): BelongsToMany
+    {
+        // $related: table yang berlasi M to M
+        // $table: table pivot untuk jembatan M to M
+        // $foreignPivotKey: PK dan FK di table pivot dari table M to M (pertama)
+        // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
+        // withPivot(name_column): supaya column ketika di query terbaca.. karna ini adalah column tambahan (costum)
+        // wherePivot(name_column): filter data sesuai kebutuhan,, contoh kasus ini adalah mengambil data seminggu terakhir yang telah dibuat
+        return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id")
+            ->withPivot("created_at")
+            ->wherePivot("created_at", ">=", Date::now()->addDays(-7));
     }
 
 }

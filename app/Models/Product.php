@@ -48,7 +48,9 @@ class Product extends Model
         // $table: table pivot untuk jembatan M to M
         // $foreignPivotKey: PK dan FK di table pivot dari table M to M (pertama)
         // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
-        return $this->belongsToMany(Customer::class, "customers_likes_products", "product_id", "customer_id");
+        // withPivot(name_column): supaya column ketika di query terbaca.. karna ini adalah column tambahan (costum)
+        return $this->belongsToMany(Customer::class, "customers_likes_products", "product_id", "customer_id")
+            ->withPivot("created_at");
     }
 
 }

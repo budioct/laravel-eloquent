@@ -38,6 +38,9 @@ select * from categories;
 select * from customers;
 select * from products;
 select * from customers_likes_products;
+show create table customers_likes_products;
+
+alter table customers_likes_products add column `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 
 

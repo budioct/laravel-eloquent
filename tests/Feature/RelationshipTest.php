@@ -556,4 +556,94 @@ class RelationshipTest extends TestCase
     }
 
 
+
+
+    /**
+     * Intermediate Table (pivot)
+     * ● Tabel penghubung (pivot) untuk relasi Many to Many kita sebut dengan Intermediate Table
+     * ● Kadang, pada kasus tertentu, tabel tersebut tidak hanya berisikan dua kolom (FK Model 1 dan FK
+     *   Model 2), kadang pada kasus tertentu, terdapat kolom tambahan
+     * ● Misal created_at, berisikan waktu relasi tersebut dibuat
+     *
+     * // buat migration add column pada table pivot many to many
+     *
+     * Pivot Attribute
+     * ● Untuk mendapatkan informasi dari Intermediate Table, kita bisa menggunakan attribute bernama
+     *   pivot pada Model, yang secara otomatis akan mengambil semua isi kolom dari Intermediate Table
+     * ● Secara default, cuma FK Model 1 dan Model 2 saja yang akan di query di Pivot Attribute.
+     * ● Jika kita ingin tambahkan kolom lain, kita bisa tambahkan pada relasi BelongsToMany dengan
+     *   menambah withPivot() pada model yang berelasi many to many
+     *
+     * // buat method yang impl withPivot()
+     * // di model Customer dan Product
+     */
+
+    public function testPivotAttribute()
+    {
+        $this->testInsertManyToMany();
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::find("BUDHI");
+        Log::info(json_encode($customer));
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+        $products = $customer->likeProducts;
+        self::assertNotNull($products);
+        Log::info(json_encode($products));
+
+        foreach ($products as $product){
+            $pivot = $product->pivot; // pivot{} // adalah object isi dari table pivot many to many dari customers dan products
+            self::assertNotNull($pivot);
+            self::assertNotNull($pivot->customer_id);
+            self::assertNotNull($pivot->product_id);
+            self::assertNotNull($pivot->created_at); // attribute created_at akan binding dengan column created_at di table
+        }
+
+        /**
+         * result:
+         * [2024-06-26 05:14:10] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 05:14:10] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 05:14:10] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+         * [2024-06-26 05:14:10] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD","pivot":{"customer_id":"BUDHI","product_id":"1","created_at":"2024-06-26T05:14:10.000000Z"}}]
+         */
+    }
+
+    /**
+     * Filtering via Intermediate Table
+     * ● Kita juga bisa melakukan filtering melalui Intermediate Table
+     * ● Contoh, kita ingin mengambil data Product yang di Like Customer, tapi created_at nya yang satu
+     *   minggu yang lalu misalnya
+     * ● Kita bisa tambahkan kondisi pada relasi BelongsToMany dengan menambahkan method dengan
+     *   prefix wherePivot()
+     */
+
+    public function testPivotAttributeCondition()
+    {
+        $this->testInsertManyToMany();
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::find("BUDHI");
+        Log::info(json_encode($customer));
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ? and `customers_likes_products`.`created_at` >= ?
+        $products = $customer->likeProductsLastWeek; // ambil data seminggu terakhir
+        Log::info(json_encode($products));
+
+        foreach ($products as $product){
+            $pivot = $product->pivot; // pivot{} // adalah object isi dari table pivot many to many dari customers dan products
+            self::assertNotNull($pivot);
+            self::assertNotNull($pivot->customer_id);
+            self::assertNotNull($pivot->product_id);
+            self::assertNotNull($pivot->created_at); // attribute created_at akan binding dengan column created_at di table
+        }
+
+        /**
+         * result:
+         * [2024-06-26 05:21:29] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 05:21:29] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 05:21:29] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ? and `customers_likes_products`.`created_at` >= ?
+         * [2024-06-26 05:21:29] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD","pivot":{"customer_id":"BUDHI","product_id":"1","created_at":"2024-06-26T05:21:29.000000Z"}}]
+         */
+    }
+
 }
