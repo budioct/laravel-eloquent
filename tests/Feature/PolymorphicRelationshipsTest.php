@@ -10,6 +10,7 @@ use Database\Seeders\CommentSeeder;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ImageSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\TagSeeder;
 use Database\Seeders\VoucherSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -236,6 +237,57 @@ class PolymorphicRelationshipsTest extends TestCase
          * [2024-06-26 10:17:25] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null order by `created_at` asc limit 1
          * [2024-06-26 10:17:25] testing.INFO: {"id":13,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"1","commentable_type":"App\\Models\\Product","created_at":"2024-06-26T10:17:25.000000Z","updated_at":"2024-06-26T10:17:25.000000Z"}
          */
+    }
+
+
+
+
+    /**
+     * Many to Many Polymorphic
+     * ● Terakhir, kita juga bisa melakukan relasi Many to Many Polymorphic
+     * ● Contoh, misal kita akan membuat Model Tag, dimana satu Tag bisa digunakan di banyak Voucher
+     *   dan Product. Begitu juga kebalikannya, Satu Voucher atau Product bisa punya banyak Tag
+     */
+
+    public function testManyToManyPolymorphic()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            TagSeeder::class
+        ]);
+
+        // sql: select * from `products` where `products`.`id` = ? limit 1
+        $product = Product::find("1");
+        Log::info(json_encode($product));
+
+        // sql: select `tags`.*, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `tags` inner join `taggables` on `tags`.`id` = `taggables`.`tag_id` where `taggables`.`taggable_id` = ? and `taggables`.`taggable_type` = ?
+        $tags = $product->tags;
+        self::assertNotNull($tags);
+        self::assertCount(1, $tags);
+        Log::info(json_encode($tags));
+
+        foreach ($tags as $tag){
+            self::assertNotNull($tag->id);
+            self::assertNotNull($tag->name);
+
+            // sql: select `vouchers`.*, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `vouchers` inner join `taggables` on `vouchers`.`id` = `taggables`.`taggable_id` where `taggables`.`tag_id` = ? and `taggables`.`taggable_type` = ? and `vouchers`.`deleted_at` is null
+            $vouchers = $tag->vouchers;
+            self::assertNotNull($vouchers);
+            self::assertCount(1, $vouchers);
+            Log::info(json_encode($vouchers));
+        }
+
+        /**
+         * result:
+         * [2024-06-26 10:46:40] testing.INFO: select * from `products` where `products`.`id` = ? limit 1
+         * [2024-06-26 10:46:40] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
+         * [2024-06-26 10:46:40] testing.INFO: select `tags`.*, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `tags` inner join `taggables` on `tags`.`id` = `taggables`.`tag_id` where `taggables`.`taggable_id` = ? and `taggables`.`taggable_type` = ?
+         * [2024-06-26 10:46:40] testing.INFO: [{"id":"aom","name":"Anak Om Mamat","pivot":{"taggable_id":"1","tag_id":"aom","taggable_type":"App\\Models\\Product"}}]
+         * [2024-06-26 10:46:40] testing.INFO: select `vouchers`.*, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `vouchers` inner join `taggables` on `vouchers`.`id` = `taggables`.`taggable_id` where `taggables`.`tag_id` = ? and `taggables`.`taggable_type` = ? and `vouchers`.`deleted_at` is null
+         * [2024-06-26 10:46:40] testing.INFO: [{"id":"9c60df78-e38e-4887-9297-7f14b483bfbf","name":"Sample Voucher","voucher_code":"22223333","create_at":"2024-06-26 17:46:40","deleted_at":null,"is_active":1,"pivot":{"tag_id":"aom","taggable_id":"9c60df78-e38e-4887-9297-7f14b483bfbf","taggable_type":"App\\Models\\Voucher"}}]
+ */
     }
 
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Product extends Model
 {
@@ -86,6 +87,15 @@ class Product extends Model
     {
         return $this->morphOne(Comment::class, "commentable")
             ->oldest("created_at"); // oldest(column_table) // ambil data paling lama
+    }
+
+    // balikan Polymorphic dari model Tag
+    public function tags(): MorphToMany
+    {
+        // morphToMany($related, $name, $type = null, $id = null, $localKey = null) // MorphMany() untuk implementasi One to Many Polymorphic
+        // $related:  relasi yang berhunbungan implementasi Polymorphic
+        // $name:     nama table pivot digunakan untuk relasi Polymorphic
+        return $this->morphToMany(Tag::class, "taggable");
     }
 
 }

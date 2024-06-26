@@ -51,3 +51,11 @@ select * from images;
 select * from comments;
 select * from vouchers;
 select * from products;
+
+describe tags;
+describe taggables;
+
+select * from vouchers;
+select * from products;
+select * from tags;
+select * from taggables;
