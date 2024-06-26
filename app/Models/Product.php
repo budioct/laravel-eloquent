@@ -75,4 +75,17 @@ class Product extends Model
         return $this->morphMany(Comment::class, "commentable");
     }
 
+    // contoh One of Many Polymorphic, Relasi One of Many Polymorphic juga mendukung penambahan kondisi,
+    public function latestComment(): MorphOne
+    {
+        return $this->morphOne(Comment::class, "commentable")
+            ->latest("created_at"); // latest(column_table) // ambil data paling baru
+    }
+
+    public function oldestComment(): MorphOne
+    {
+        return $this->morphOne(Comment::class, "commentable")
+            ->oldest("created_at"); // oldest(column_table) // ambil data paling lama
+    }
+
 }

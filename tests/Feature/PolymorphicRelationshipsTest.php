@@ -194,4 +194,50 @@ class PolymorphicRelationshipsTest extends TestCase
     }
 
 
+
+
+    /**
+     * One of Many Polymorphic
+     * ● Relasi One to Many Polymorphic juga mendukung penambahan kondisi, seperti yang pernah kita
+     *   pelajari di materi Has One of Many
+     * // contoh kasus pada model Product kita ingin mengabil data lama dan baru berdasarkan column created_at
+     */
+
+    public function testOneOfManyPolymorphic()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            CommentSeeder::class
+        ]);
+
+        // sql: select * from `products` where `products`.`id` = ? limit 1
+        $product = Product::find("1");
+        self::assertNotNull($product);
+        Log::info(json_encode($product));
+
+        // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null order by `created_at` desc limit 1
+        $comment = $product->latestComment; // latestComment // ambil data paling baru
+        self::assertNotNull($comment);
+        Log::info(json_encode($comment));
+
+        // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null order by `created_at` asc limit 1
+        $comment = $product->oldestComment; // oldestComment // ambil data paling lama
+        self::assertNotNull($comment);
+        Log::info(json_encode($comment));
+
+        /**
+         * result:
+         * [2024-06-26 10:17:25] testing.INFO: select * from `products` where `products`.`id` = ? limit 1
+         * [2024-06-26 10:17:25] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
+         * [2024-06-26 10:17:25] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null order by `created_at` desc limit 1
+         * [2024-06-26 10:17:25] testing.INFO: {"id":13,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"1","commentable_type":"App\\Models\\Product","created_at":"2024-06-26T10:17:25.000000Z","updated_at":"2024-06-26T10:17:25.000000Z"}
+         * [2024-06-26 10:17:25] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null order by `created_at` asc limit 1
+         * [2024-06-26 10:17:25] testing.INFO: {"id":13,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"1","commentable_type":"App\\Models\\Product","created_at":"2024-06-26T10:17:25.000000Z","updated_at":"2024-06-26T10:17:25.000000Z"}
+         */
+    }
+
+
+
 }
