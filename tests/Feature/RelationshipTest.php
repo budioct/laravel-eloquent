@@ -425,4 +425,135 @@ class RelationshipTest extends TestCase
     }
 
 
+
+
+    /**
+     * Many to Many
+     * ● Seperti yang kita tahu, relasi Many to Many harus membuat tabel jembatan di tengahnya
+     * ● Dan ketika implementasi relasi Many to Many di Model, cukup mudah, cukup gunakan
+     *   belongsToMany di kedua Model nya
+     * ● Misal kita akan membuat fitur Likes, dimana Customer bisa melakukan Likes ke Product, yang
+     *   artinya satu Customer bisa Likes banyak Product, satu Product bisa di Likes oleh banyak Customer
+     * ● Artinya relasinya adalah Many to Many
+     * ● Kita akan buat tabel customers_likes_products sebagai tabel jembatan nya
+     *
+     * Menambah Relasi
+     * ● Karena pada kasus Many to Many, kita tidak memiliki Model untuk tabel jembatannya, oleh karena
+     *   itu untuk menambah relasi kita tidak bisa melakukan insert data Model pertama atau Model kedua
+     * ● Untuk menambah relasi, kita bisa menggunakan method relation BelongsToMany dengan
+     *   mengunakan method attach()
+     */
+
+    public function testInsertManyToMany(){
+
+        $this->seed([
+            CustomerSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class
+        ]);
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::query()->find("BUDHI");
+        self::assertNotNull($customer);
+        Log::info(json_encode($customer));
+
+        // sql: insert into `customers_likes_products` (`customer_id`, `product_id`) values (?, ?)
+        $customer->likeProducts()->attach("1"); // attach("id relasi pivot")menambah data products pada relasi table pivot
+        self::assertNotNull($customer);
+        Log::info(json_encode($customer));
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+        $products = $customer->likeProducts; // akses table pivot
+        self::assertCount(1, $products);
+        self::assertEquals("1", $products[0]->id);
+        Log::info(json_encode($products));
+
+        // insert sebaliknya
+//        $product = Product::query()->find("2");
+//        self::assertNotNull($product);
+//        Log::info(json_encode($product));
+
+//        $product->likeByCustomers()->attach("BUDHI"); // attach("id relasi pivot") // tambah data ke table pivot
+//        self::assertNotNull($product);
+//        Log::info(json_encode($product));
+
+//        $customers = $product->likeByCustomers; // akses table pivot
+//        self::assertCount(1, $customers);
+//        self::assertEquals("BUDHI", $customers[0]->id);
+//        Log::info(json_encode($customers));
+
+        /**
+         * result:
+         * [2024-06-26 03:06:11] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 03:06:11] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 03:06:11] testing.INFO: insert into `customers_likes_products` (`customer_id`, `product_id`) values (?, ?)
+         * [2024-06-26 03:06:11] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 03:06:11] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+         * [2024-06-26 03:06:11] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD","pivot":{"customer_id":"BUDHI","product_id":"1"}}]
+         */
+
+    }
+
+    public function testQueryManyToMany(){
+
+        $this->testInsertManyToMany();
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::query()->find("BUDHI");
+        Log::info(json_encode($customer));
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+        $products = $customer->likeProducts;
+        Log::info(json_encode($products));
+
+        self::assertNotNull($products);
+        self::assertCount(1, $products);
+        self::assertEquals("1", $products[0]->id);
+        self::assertEquals("Product 1", $products[0]->name);
+        self::assertEquals("Description 1", $products[0]->description);
+
+        /**
+         * [2024-06-26 03:27:40] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 03:27:40] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 03:27:40] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+         * [2024-06-26 03:27:40] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD","pivot":{"customer_id":"BUDHI","product_id":"1"}}]
+         */
+
+    }
+
+    /**
+     * Menghapus Relasi
+     * ● Untuk menghapus relasi One to One atau One to Many cukup mudah, tinggal menghapus data
+     *   kolom FK nya
+     * ● Untuk menghapus data relasi Many to Many, kita bisa menggunakan method detach() pada
+     *   BelongsToMany
+     */
+
+    public function testRemoveManyToMany(){
+
+        $this->testInsertManyToMany();
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::query()->find("BUDHI");
+
+        // sql: delete from `customers_likes_products` where `customers_likes_products`.`customer_id` = ? and `customers_likes_products`.`product_id` in (?)
+        $customer->likeProducts()->detach("1"); // detach("id relasi pivot") //  hapus data products pada relasi table pivot
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+        $products = $customer->likeProducts;
+        self::assertNotNull($products);
+        self::assertCount(0,$products);
+        Log::info(json_encode($products));
+
+        /**
+         * result:
+         * [2024-06-26 03:32:48] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 03:32:48] testing.INFO: delete from `customers_likes_products` where `customers_likes_products`.`customer_id` = ? and `customers_likes_products`.`product_id` in (?)
+         * [2024-06-26 03:32:48] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+         * [2024-06-26 03:32:48] testing.INFO: []
+         */
+
+    }
+
+
 }

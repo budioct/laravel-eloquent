@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -52,6 +54,16 @@ class Customer extends Model
         // $foreignKey: customer_id (FK) di table products
         // $localKey:   id PK dari table "customers"
         return $this->hasMany(Review::class, "customer_id", "id");
+    }
+
+    // buat method untuk relasi many ~ many ke table products
+    public function likeProducts(): BelongsToMany
+    {
+        // $related: table yang berlasi M to M
+        // $table: table pivot untuk jembatan M to M
+        // $foreignPivotKey: PK dan FK di table pivot dari table M to M (pertama)
+        // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
+        return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id");
     }
 
 }

@@ -31,5 +31,13 @@ select * from products;
 describe reviews;
 select * from reviews;
 
+describe customers_likes_products;
+show create table customers_likes_products;
+
+select * from categories;
+select * from customers;
+select * from products;
+select * from customers_likes_products;
+
 
 
