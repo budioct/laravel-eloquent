@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Voucher;
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\CommentSeeder;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ImageSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\VoucherSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
@@ -114,5 +117,81 @@ class PolymorphicRelationshipsTest extends TestCase
          * [2024-06-26 09:18:23] testing.INFO: {"id":6,"url":"https:\/\/www.programmerzamannow.com\/image\/2.jpg","imageable_id":"1","imageable_type":"App\\Models\\Product"}
          */
     }
+
+
+
+
+    /**
+     * One to Many Polymorphic
+     * ● Selain One to One, Polymorphic juga mendukung relasi One to Many
+     * ● Sebenarnya cara pembuatan One to One dan One to Many hampir mirip, bedanya adalah pada
+     *   tabel, kita tidak menambahkan Unique Constraint, karena bisa lebih dari satu
+     * ● Contoh kasus, misal kita sebelumnya sudah membuat model Comment
+     * ● Misal, kita akan membuat relasi One to Many Polymorphic pada Comment dengan Product dan Voucher
+     * ● Artinya kita bisa menambah Comment ke Product dan juga Voucher, dan lebih dari satu Comment
+     */
+
+    public function testOneToManyPolymorphicRelationProducts()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            CommentSeeder::class
+        ]);
+
+        // sql: select * from `products` where `products`.`id` = ? limit 1
+        $product = Product::find("1");
+        self::assertNotNull($product);
+        Log::info(json_encode($product));
+
+        // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+        $comments = $product->comments;
+        foreach ($comments as $comment){
+            self::assertEquals(Product::class, $comment->commentable_type);
+            self::assertEquals($product->id, $comment->commentable_id);
+            Log::info(json_encode($comment));
+        }
+
+        /**
+         * result:
+         * [2024-06-26 09:46:40] testing.INFO: select * from `products` where `products`.`id` = ? limit 1
+         * [2024-06-26 09:46:40] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
+         * [2024-06-26 09:46:40] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+         * [2024-06-26 09:46:40] testing.INFO: {"id":9,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"1","commentable_type":"App\\Models\\Product","created_at":"2024-06-26T09:46:40.000000Z","updated_at":"2024-06-26T09:46:40.000000Z"}
+         */
+    }
+
+    public function testOneToManyPolymorphicRelationVouchers()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            CommentSeeder::class
+        ]);
+
+        // sql: select * from `vouchers` where `vouchers`.`deleted_at` is null limit 1
+        $voucher = Voucher::query()->firstOrFail();
+        self::assertNotNull($voucher);
+        Log::info(json_encode($voucher));
+
+        // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+        $comments = $voucher->comments;
+        foreach ($comments as $comment){
+            self::assertEquals(Voucher::class, $comment->commentable_type);
+            self::assertEquals($voucher->id, $comment->commentable_id);
+            Log::info(json_encode($comment));
+        }
+
+        /**
+         * result:
+         * [2024-06-26 09:51:48] testing.INFO: select * from `vouchers` where `vouchers`.`deleted_at` is null limit 1
+         * [2024-06-26 09:51:48] testing.INFO: {"id":"9c60cbd9-8bbd-4390-93ac-2c0f5ae2a4c1","name":"Sample Voucher","voucher_code":"22223333","create_at":"2024-06-26 16:51:48","deleted_at":null,"is_active":1}
+         * [2024-06-26 09:51:48] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+         * [2024-06-26 09:51:48] testing.INFO: {"id":12,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"9c60cbd9-8bbd-4390-93ac-2c0f5ae2a4c1","commentable_type":"App\\Models\\Voucher","created_at":"2024-06-26T09:51:48.000000Z","updated_at":"2024-06-26T09:51:48.000000Z"}
+         */
+    }
+
 
 }

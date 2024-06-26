@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Product extends Model
@@ -63,6 +64,15 @@ class Product extends Model
         // $related:  relasi yang berhunbungan implementasi Polymorphic
         // $name:     nama  method yang digunakan untuk relasi Polymorphic
         return $this->morphOne(Image::class, "imageable");
+    }
+
+    // balikan Polymorphic dari model Comment
+    public function comments(): MorphMany
+    {
+        // morphMany($related, $name, $type = null, $id = null, $localKey = null) // MorphMany() untuk implementasi One to Many Polymorphic
+        // $related:  relasi yang berhunbungan implementasi Polymorphic
+        // $name:     nama  method yang digunakan untuk relasi Polymorphic
+        return $this->morphMany(Comment::class, "commentable");
     }
 
 }

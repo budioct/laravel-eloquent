@@ -13,6 +13,11 @@ select * from vouchers;
 describe comments;
 select * from comments;
 
+show create table comments;
+
+alter table comments add column `commentable_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL;
+alter table comments add column `commentable_type` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL;
+
 # one to one
 describe customers;
 describe wallets;
@@ -42,3 +47,7 @@ show create table customers_likes_products;
 
 describe images;
 select * from images;
+
+select * from comments;
+select * from vouchers;
+select * from products;

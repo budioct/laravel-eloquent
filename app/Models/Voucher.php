@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -42,6 +43,15 @@ class Voucher extends Model
     public function scopeNonActive(Builder $builder): void
     {
         $builder->where('is_active', false);
+    }
+
+    // balikan Polymorphic dari model Comment
+    public function comments(): MorphMany
+    {
+        // morphOne($related, $name, $type = null, $id = null, $localKey = null) // MorphMany() untuk implementasi One to Many Polymorphic
+        // $related:  relasi yang berhunbungan implementasi Polymorphic
+        // $name:     nama  method yang digunakan untuk relasi Polymorphic
+        return $this->morphMany(Comment::class, "commentable");
     }
 
 }

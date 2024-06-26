@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Comment extends Model
 {
@@ -20,4 +21,13 @@ class Comment extends Model
         "title" => "Sample Title",
         "comment" => "Sample Comment",
     ];
+
+    // buat method untuk polymorphic
+    // jadi tables comments bisa menyimpan 2 FK dari table products dan vouchers
+    // type method yang dibuat harus return MorphTo // karna table comments sebagai wadah FK dari table products dan vouchers
+    // morphTo()  // karna table comments sebagai wadah FK dari table products dan vouchers
+    public function commentable(): MorphTo
+    {
+        return $this->morphTo();
+    }
 }
