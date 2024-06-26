@@ -646,4 +646,61 @@ class RelationshipTest extends TestCase
          */
     }
 
+
+
+
+    /**
+     * Pivot Model
+     * ● Jika Intermediate Table memiliki kolom selain kolom untuk Join, kadang ada baiknya dibuat dalam
+     *   bentuk Pivot Model
+     * ● Pivot Model adalah Model seperti biasanya, hanya saja harus turunan dari Pivot, bukan Model
+     * ● Salah satu kelebihan menambahkan Pivot Model adalah, kita bisa query data secara langsung lewat
+     *   Pivot Model atau menambahkan relasi pada Pivot Model
+     *
+     * Pivot Class
+     * ● Pivot Class sebenarnya adalah turunan dari Model class, oleh karena itu hampir semua yang bisa
+     *   dilakukan di Model, bisa juga dilakukan di Pivot
+     * ● Namun pada Pivot Class, secara default $incrementing bernilai false, jadi jika kita membuat Pivot
+     *   Model dengan auto increment, maka kita harus mengubah nilai $incrementing nya menjadi true
+     * ● Selain itu, Pivot Model tidak mendukung SoftDeletes, jika kita ingin menggunakan SoftDeletes, kita
+     *   perlu mengubah Pivot Model, menjadi Model biasa pada Eloquent
+     */
+
+    public function testPivotModel()
+    {
+        $this->testInsertManyToMany();
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::find("BUDHI");
+        Log::info(json_encode($customer));
+
+        // sql: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+        $products = $customer->likeProducts;
+        Log::info(json_encode($products));
+
+        foreach ($products as $product){
+            $pivot = $product->pivot; // object Model Like
+            self::assertNotNull($pivot);
+            self::assertNotNull($pivot->customer_id);
+            self::assertNotNull($pivot->product_id);
+            self::assertNotNull($pivot->created_at);
+
+            // sql: select * from `customers` where `customers`.`id` = ? limit 1
+            self::assertNotNull($pivot->customer);
+
+            // sql: select * from `products` where `products`.`id` = ? limit 1
+            self::assertNotNull($pivot->product);
+        }
+
+        /**
+         * result:
+         * [2024-06-26 06:23:56] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 06:23:56] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-26 06:23:56] testing.INFO: select `products`.*, `customers_likes_products`.`customer_id` as `pivot_customer_id`, `customers_likes_products`.`product_id` as `pivot_product_id`, `customers_likes_products`.`created_at` as `pivot_created_at` from `products` inner join `customers_likes_products` on `products`.`id` = `customers_likes_products`.`product_id` where `customers_likes_products`.`customer_id` = ?
+         * [2024-06-26 06:23:56] testing.INFO: [{"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD","pivot":{"customer_id":"BUDHI","product_id":"1","created_at":"2024-06-26 06:23:56"}}]
+         * [2024-06-26 06:23:57] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-26 06:23:57] testing.INFO: select * from `products` where `products`.`id` = ? limit 1
+         */
+    }
+
 }

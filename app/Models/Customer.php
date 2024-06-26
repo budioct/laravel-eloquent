@@ -65,8 +65,10 @@ class Customer extends Model
         // $foreignPivotKey: PK dan FK di table pivot dari table M to M (pertama)
         // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
         // withPivot(name_column): supaya column ketika di query terbaca.. karna ini adalah column tambahan (costum)
+        // using(model_extends_pivot_class): supaya pivot yang di akses langsung menjadi object model {}, tidak lagi menjadi array object [{},{}]
         return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id")
-            ->withPivot("created_at");
+            ->withPivot("created_at")
+            ->using(Like::class);
     }
 
     // buat method untuk relasi many ~ many ke table products
@@ -79,9 +81,11 @@ class Customer extends Model
         // $relatedPivotKey: PK dan FK di table pivot dari table M to M (kedua)
         // withPivot(name_column): supaya column ketika di query terbaca.. karna ini adalah column tambahan (costum)
         // wherePivot(name_column): filter data sesuai kebutuhan,, contoh kasus ini adalah mengambil data seminggu terakhir yang telah dibuat
+        // using(model_extends_pivot_class): supaya pivot yang di akses langsung menjadi object model {}, tidak lagi menjadi array object [{},{}]
         return $this->belongsToMany(Product::class, "customers_likes_products", "customer_id", "product_id")
             ->withPivot("created_at")
-            ->wherePivot("created_at", ">=", Date::now()->addDays(-7));
+            ->wherePivot("created_at", ">=", Date::now()->addDays(-7))
+            ->using(Like::class);
     }
 
 }
