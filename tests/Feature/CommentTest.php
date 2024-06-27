@@ -34,6 +34,9 @@ class CommentTest extends TestCase
         $comment->email = "budioct@test.com";
         $comment->title = "Sample title";
         $comment->comment = "Sample comment";
+        $comment->commentable_id = "1";
+        $comment->commentable_type = "product";
+
         // untuk created_at dan updated_at tidak perlu di set karna laravel akan auto generate..
         // untuk pertama kali data di buat ke 2 column ini akan di set datanyaa
         // jika datanya di update maka updated_at saja yang di set
@@ -71,6 +74,8 @@ class CommentTest extends TestCase
 
         $comment = new Comment();
         $comment->email = "budioct@test.com";
+        $comment->commentable_id = "1";
+        $comment->commentable_type = "product";
 
         // kita tidak perlu set column title dan comment.. nanti akan di set $attributes default value pada model
         //$comment->title = "Sample title";

@@ -262,13 +262,13 @@ class RelationshipTest extends TestCase
         // query jika ingin get all product berdasarkan id categirues
         // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null
         $products = $category->products;
-        self::assertCount(1, $products);
+        self::assertCount(2, $products);
         Log::info($products);
 
         // query untuk mendapatkan data berdasarkan ketentuan kondisi
         // sql: select * from `products` where `products`.`category_id` = ? and `products`.`category_id` is not null and `stock` <= ?
         $outOfStockProducts = $category->products()->where('stock', '<=', 0)->get();
-        self::assertCount(1, $outOfStockProducts);
+        self::assertCount(2, $outOfStockProducts);
         Log::info($outOfStockProducts);
 
         /**

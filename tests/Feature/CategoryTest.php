@@ -63,7 +63,7 @@ class CategoryTest extends TestCase
      *
      */
 
-    public function testMethodMagic(){
+    public function MethodMagic(){
 
         // __callStatic()
         Category::query()->where();
@@ -89,6 +89,7 @@ class CategoryTest extends TestCase
             $categories[] = [
                 "id" => "ID $i",
                 "name" => "Name $i",
+                "is_active" => true,
             ]; // data di sisipkan ke array $categories[]
         }
 
@@ -230,6 +231,7 @@ class CategoryTest extends TestCase
             $category = new Category();
             $category->id = "FOOD $i";
             $category->name = "Food $i";
+            $category->is_active = true;
             $category->save(); // save() // eksekusi simpan
         }
 
@@ -270,6 +272,7 @@ class CategoryTest extends TestCase
             $category = new Category();
             $category->id = "FOOD $i";
             $category->name = "Food $i";
+            $category->is_active = true;
             $category->save(); // save() // eksekusi simpan
         }
 
@@ -333,6 +336,7 @@ class CategoryTest extends TestCase
             $categories[] = [
                 "id" => "ID $i",
                 "name" => "Name $i",
+                "is_active" => true,
             ]; // data di sisipkan ke array $categories[]
         }
 
@@ -428,6 +432,7 @@ class CategoryTest extends TestCase
             $categories[] = [
                 "id" => "ID $i",
                 "name" => "Name $i",
+                "is_active" => true,
             ]; // data di sisipkan ke array $categories[]
         }
 

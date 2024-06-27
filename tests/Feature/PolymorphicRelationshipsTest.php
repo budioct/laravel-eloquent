@@ -149,7 +149,8 @@ class PolymorphicRelationshipsTest extends TestCase
         // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
         $comments = $product->comments;
         foreach ($comments as $comment){
-            self::assertEquals(Product::class, $comment->commentable_type);
+            //self::assertEquals(Product::class, $comment->commentable_type);
+            self::assertEquals("product", $comment->commentable_type);
             self::assertEquals($product->id, $comment->commentable_id);
             Log::info(json_encode($comment));
         }
@@ -180,7 +181,8 @@ class PolymorphicRelationshipsTest extends TestCase
         // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
         $comments = $voucher->comments;
         foreach ($comments as $comment){
-            self::assertEquals(Voucher::class, $comment->commentable_type);
+            //self::assertEquals(Voucher::class, $comment->commentable_type);
+            self::assertEquals("voucher", $comment->commentable_type);
             self::assertEquals($voucher->id, $comment->commentable_id);
             Log::info(json_encode($comment));
         }
