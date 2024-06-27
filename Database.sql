@@ -62,3 +62,6 @@ select * from taggables;
 
 describe person;
 select * from person;
+
+describe employees;
+select * from employees;
