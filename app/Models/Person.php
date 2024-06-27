@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\AsAddress;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class Person extends Model
     // key adalah colum yang ada di table
     // value adalah type_data casting apa yang di inginkan
     protected $casts = [
+        'address' => AsAddress::class, // column address yang di collect akan di casting ke object AsAddress, nantinya AsAddress akan instance ke object Address (DTO)
         "created_at" => 'datetime',
         "updated_at" => 'datetime',
     ];
