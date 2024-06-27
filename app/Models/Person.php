@@ -12,7 +12,16 @@ class Person extends Model
     protected $primaryKey = "id"; // $primaryKey // deskripsi binding nama column primarykey pada table
     protected $keyType = "int"; // $keyType // deskripsi type data nama column primarykey
     public $incrementing = true; // $incrementing // deskripsi jika id type int / bigInt maka yang akan autoincrement pada table. default model laravel adalah true
-    public $timestamps = false; // $timestamps adalah fitur laravel akan auto generate created_at dan updated_at // default model laravel adalah true
+    public $timestamps = true; // $timestamps adalah fitur laravel akan auto generate created_at dan updated_at // default model laravel adalah true
+
+    // Attribute Casting fitur laravel eloquent
+    // ini akan otomatis casting ke type data php
+    // key adalah colum yang ada di table
+    // value adalah type_data casting apa yang di inginkan
+    protected $casts = [
+        "created_at" => 'datetime',
+        "updated_at" => 'datetime',
+    ];
 
     // kita buat method yang handle Accessor dan Mutator
     // nanti yang kita panggil adalah attributenya,
