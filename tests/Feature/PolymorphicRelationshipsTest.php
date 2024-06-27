@@ -287,9 +287,129 @@ class PolymorphicRelationshipsTest extends TestCase
          * [2024-06-26 10:46:40] testing.INFO: [{"id":"aom","name":"Anak Om Mamat","pivot":{"taggable_id":"1","tag_id":"aom","taggable_type":"App\\Models\\Product"}}]
          * [2024-06-26 10:46:40] testing.INFO: select `vouchers`.*, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `vouchers` inner join `taggables` on `vouchers`.`id` = `taggables`.`taggable_id` where `taggables`.`tag_id` = ? and `taggables`.`taggable_type` = ? and `vouchers`.`deleted_at` is null
          * [2024-06-26 10:46:40] testing.INFO: [{"id":"9c60df78-e38e-4887-9297-7f14b483bfbf","name":"Sample Voucher","voucher_code":"22223333","create_at":"2024-06-26 17:46:40","deleted_at":null,"is_active":1,"pivot":{"tag_id":"aom","taggable_id":"9c60df78-e38e-4887-9297-7f14b483bfbf","taggable_type":"App\\Models\\Voucher"}}]
- */
+         */
     }
 
+
+
+
+    /**
+     * Polymorphic Types
+     * ● Secara default, type di relasi Polymorphic akan menggunakan nama Class Model yang kita gunakan
+     * ● Namun, hal ini bisa berbahaya misal kita mengubah nama Model atau mengubah namespace
+     *   Model, karena secara otomatis type di Polymorphic tidak akan berjalan
+     * ● Kadang, ada baiknya kita menambahkan type untuk Polymorphic
+     * ● Kita bisa tambahkan pada Service Provider dengan manggil Relation::enforceMorphMap()
+     *
+     * // register model yang implement polymorphic di ../app/Providers/AppServiceProvider.php, di method boot()
+     * Relation::enforceMorphMap([
+     * 'product' => Product::class,
+     * 'voucher' => Voucher::class,
+     * 'customer' => Customer::class
+     * ]);
+     * // jadi yang di simpan pada column_able_type bukan lagi Model::class
+     * // tapi key alias yang sudah di registrasikan oleh class modelnya seperti 'product', 'voucher', 'customer'
+     */
+
+    public function testOneToOneWithPolymorphicTypes(){
+
+        $this->seed([
+            CustomerSeeder::class,
+            ImageSeeder::class,
+        ]);
+
+        // sql: select * from `customers` where `customers`.`id` = ? limit 1
+        $customer = Customer::query()->find("BUDHI");
+        self::assertNotNull($customer);
+        Log::info(json_encode($customer));
+
+        // sql: select * from `images` where `images`.`imageable_type` = ? and `images`.`imageable_id` = ? and `images`.`imageable_id` is not null limit 1
+        $image = $customer->image;
+        self::assertNotNull($image);
+        self::assertEquals("https://www.programmerzamannow.com/image/1.jpg", $image->url);
+        Log::info(json_encode($image));
+
+        /**
+         * result:
+         * [2024-06-27 01:20:38] testing.INFO: select * from `customers` where `customers`.`id` = ? limit 1
+         * [2024-06-27 01:20:38] testing.INFO: {"id":"BUDHI","name":"budhi","email":"budhi@test.com"}
+         * [2024-06-27 01:20:38] testing.INFO: select * from `images` where `images`.`imageable_type` = ? and `images`.`imageable_id` = ? and `images`.`imageable_id` is not null limit 1
+         * [2024-06-27 01:20:38] testing.INFO: {"id":11,"url":"https:\/\/www.programmerzamannow.com\/image\/1.jpg","imageable_id":"BUDHI","imageable_type":"customer"}
+         */
+
+    }
+
+    public function testOneToManyWithPolymorphicTypes()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            CommentSeeder::class
+        ]);
+
+        // sql: select * from `vouchers` where `vouchers`.`deleted_at` is null limit 1
+        $voucher = Voucher::query()->firstOrFail();
+        self::assertNotNull($voucher);
+        Log::info(json_encode($voucher));
+
+        // sql: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+        $comments = $voucher->comments;
+        foreach ($comments as $comment){
+            self::assertEquals("voucher", $comment->commentable_type);
+            self::assertEquals($voucher->id, $comment->commentable_id);
+            Log::info(json_encode($comment));
+        }
+
+        /**
+         * result:
+         * [2024-06-27 01:22:57] testing.INFO: select * from `vouchers` where `vouchers`.`deleted_at` is null limit 1
+         * [2024-06-27 01:22:57] testing.INFO: {"id":"9c6218db-1812-4927-a15f-ac1990a2d867","name":"Sample Voucher","voucher_code":"22223333","create_at":"2024-06-27 08:22:57","deleted_at":null,"is_active":1}
+         * [2024-06-27 01:22:57] testing.INFO: select * from `comments` where `comments`.`commentable_type` = ? and `comments`.`commentable_id` = ? and `comments`.`commentable_id` is not null
+         * [2024-06-27 01:22:57] testing.INFO: {"id":18,"email":"budhi@test.com","title":"Title","comment":"Sample Comment","commentable_id":"9c6218db-1812-4927-a15f-ac1990a2d867","commentable_type":"voucher","created_at":"2024-06-27T01:22:57.000000Z","updated_at":"2024-06-27T01:22:57.000000Z"}
+         */
+    }
+
+    public function testManyToManyWithPolymorphicTypes()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            VoucherSeeder::class,
+            TagSeeder::class
+        ]);
+
+        // sql: select * from `products` where `products`.`id` = ? limit 1
+        $product = Product::find("1");
+        Log::info(json_encode($product));
+
+        // sql: select `tags`.*, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `tags` inner join `taggables` on `tags`.`id` = `taggables`.`tag_id` where `taggables`.`taggable_id` = ? and `taggables`.`taggable_type` = ?
+        $tags = $product->tags;
+        self::assertNotNull($tags);
+        self::assertCount(1, $tags);
+        Log::info(json_encode($tags));
+
+        foreach ($tags as $tag){
+            self::assertNotNull($tag->id);
+            self::assertNotNull($tag->name);
+
+            // sql: select `vouchers`.*, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `vouchers` inner join `taggables` on `vouchers`.`id` = `taggables`.`taggable_id` where `taggables`.`tag_id` = ? and `taggables`.`taggable_type` = ? and `vouchers`.`deleted_at` is null
+            $vouchers = $tag->vouchers;
+            self::assertNotNull($vouchers);
+            self::assertCount(1, $vouchers);
+            Log::info(json_encode($vouchers));
+        }
+
+        /**
+         * result:
+         * [2024-06-27 01:15:27] testing.INFO: select * from `products` where `products`.`id` = ? limit 1
+         * [2024-06-27 01:15:27] testing.INFO: {"id":"1","name":"Product 1","description":"Description 1","price":0,"stock":0,"category_id":"FOOD"}
+         * [2024-06-27 01:15:27] testing.INFO: select `tags`.*, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `tags` inner join `taggables` on `tags`.`id` = `taggables`.`tag_id` where `taggables`.`taggable_id` = ? and `taggables`.`taggable_type` = ?
+         * [2024-06-27 01:15:27] testing.INFO: [{"id":"aom","name":"Anak Om Mamat","pivot":{"taggable_id":"1","tag_id":"aom","taggable_type":"product"}}]
+         * [2024-06-27 01:15:27] testing.INFO: select `vouchers`.*, `taggables`.`tag_id` as `pivot_tag_id`, `taggables`.`taggable_id` as `pivot_taggable_id`, `taggables`.`taggable_type` as `pivot_taggable_type` from `vouchers` inner join `taggables` on `vouchers`.`id` = `taggables`.`taggable_id` where `taggables`.`tag_id` = ? and `taggables`.`taggable_type` = ? and `vouchers`.`deleted_at` is null
+         * [2024-06-27 01:15:27] testing.INFO: [{"id":"9c62162c-b960-4f38-bee3-be2ba4877409","name":"Sample Voucher","voucher_code":"22223333","create_at":"2024-06-27 08:15:27","deleted_at":null,"is_active":1,"pivot":{"tag_id":"aom","taggable_id":"9c62162c-b960-4f38-bee3-be2ba4877409","taggable_type":"voucher"}}]
+         */
+    }
 
 
 }

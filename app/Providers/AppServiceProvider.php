@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Customer;
+use App\Models\Product;
+use App\Models\Voucher;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,5 +45,21 @@ class AppServiceProvider extends ServiceProvider
         DB::listen(function (QueryExecuted $query) {
             Log::info($query->sql); // sql // properti yang mau kita simpan di log
         });
+
+        /**
+         * Polymorphic Types
+         * ● Secara default, type di relasi Polymorphic akan menggunakan nama Class Model yang kita gunakan
+         * ● Namun, hal ini bisa berbahaya misal kita mengubah nama Model atau mengubah namespace
+         *   Model, karena secara otomatis type di Polymorphic tidak akan berjalan
+         * ● Kadang, ada baiknya kita menambahkan type untuk Polymorphic
+         * ● Kita bisa tambahkan pada Service Provider dengan manggil Relation::enforceMorphMap()
+         */
+        // Relation::enforceMorphMap(array $map) // register model yang implement polymorphic
+        Relation::enforceMorphMap([
+            'product' => Product::class,
+            'voucher' => Voucher::class,
+            'customer' => Customer::class,
+        ]);
+
     }
 }
