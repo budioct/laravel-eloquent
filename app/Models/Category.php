@@ -70,6 +70,15 @@ class Category extends Model
         "description",
     ];
 
+    // Attribute Casting fitur laravel eloquent
+    // ini akan otomatis casting ke type data php
+    // key adalah colum yang ada di table
+    // value adalah type_data casting apa yang di inginkan
+    protected $casts = [
+        // format character: U	= Detik sejak the Unix Epoch (January 1 1970 00:00:00 GMT)	lihat juga time()
+        "created_at" => 'datetime:U', // ingin casting dari data timetamps ke milisecond Detik sejak Unix Epoch
+    ];
+
     // register query global scope
     protected static function booted(): void
     {

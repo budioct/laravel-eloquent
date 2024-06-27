@@ -19,6 +19,10 @@ class Product extends Model
     public $incrementing = false; // $incrementing // deskripsi jika id type int / bigInt maka yang akan autoincrement pada table. default model laravel adalah true
     public $timestamps = false; // $timestamps adalah fitur laravel akan auto generate auto_create dan auto_update // default model laravel adalah true
 
+    // Hidden Attributes saat di akses modelnya karena data nya sudah di tampilkan pada object relasi
+    protected $hidden = [
+      "category_id"
+    ];
 
     // buat method untuk relasi kebalikan relasi 'categories' 1 ~ Many 'products'
     // untuk model pertama 'HasMany' dan model kedua 'BelongsTo'
