@@ -19,6 +19,8 @@ class Customer extends Model
     protected $keyType = "string"; // $keyType // deskripsi type data nama column primarykey
     public $incrementing = false; // $incrementing // deskripsi jika id type int / bigInt maka yang akan autoincrement pada table. default model laravel adalah true
     public $timestamps = false; // $timestamps adalah fitur laravel akan auto generate created_at dan updated_at // default model laravel adalah true
+    protected $with = ["wallet", "image"]; // $with adalah fitur eager loading untuk collect data yang berelasi id model Customer atau table customers.. ketika model ini di query otomatis data relasinya akan di collect juga
+
 
     // buat method untuk relasi ke table wallets relasi 1 ~ 1
     // dimana return value method HasOne (Punya satu), menentukan memiliki relasi satu
