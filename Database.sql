@@ -59,3 +59,6 @@ select * from vouchers;
 select * from products;
 select * from tags;
 select * from taggables;
+
+describe person;
+select * from person;
